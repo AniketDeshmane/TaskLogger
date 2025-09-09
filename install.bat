@@ -27,25 +27,11 @@ echo Copying application files...
 xcopy /E /I /Y "%~dp0*" "%INSTALL_DIR%\" >nul
 
 echo Creating desktop shortcut...
-powershell -ExecutionPolicy Bypass -Command ^
-    "$WshShell = New-Object -comObject WScript.Shell; ^
-     $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Task Logger.lnk'); ^
-     $Shortcut.TargetPath = '%INSTALL_DIR%\TaskLogger.exe'; ^
-     $Shortcut.WorkingDirectory = '%INSTALL_DIR%'; ^
-     $Shortcut.IconLocation = '%INSTALL_DIR%\TaskLogger.exe'; ^
-     $Shortcut.Description = 'Task Logger - Track your daily tasks'; ^
-     $Shortcut.Save()"
+powershell -ExecutionPolicy Bypass -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Task Logger.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\TaskLogger.exe'; $Shortcut.WorkingDirectory = '%INSTALL_DIR%'; $Shortcut.IconLocation = '%INSTALL_DIR%\TaskLogger.exe, 0'; $Shortcut.Description = 'Task Logger - Track your daily tasks'; $Shortcut.Save()"
 
 echo Creating Start Menu shortcut...
 set START_MENU=%APPDATA%\Microsoft\Windows\Start Menu\Programs
-powershell -ExecutionPolicy Bypass -Command ^
-    "$WshShell = New-Object -comObject WScript.Shell; ^
-     $Shortcut = $WshShell.CreateShortcut('%START_MENU%\Task Logger.lnk'); ^
-     $Shortcut.TargetPath = '%INSTALL_DIR%\TaskLogger.exe'; ^
-     $Shortcut.WorkingDirectory = '%INSTALL_DIR%'; ^
-     $Shortcut.IconLocation = '%INSTALL_DIR%\TaskLogger.exe'; ^
-     $Shortcut.Description = 'Task Logger - Track your daily tasks'; ^
-     $Shortcut.Save()"
+powershell -ExecutionPolicy Bypass -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%START_MENU%\Task Logger.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\TaskLogger.exe'; $Shortcut.WorkingDirectory = '%INSTALL_DIR%'; $Shortcut.IconLocation = '%INSTALL_DIR%\TaskLogger.exe, 0'; $Shortcut.Description = 'Task Logger - Track your daily tasks'; $Shortcut.Save()"
 
 echo.
 echo ==========================================

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -12,7 +14,7 @@ namespace TaskLogger.ViewModels
     public class HistoryViewModel : INotifyPropertyChanged
     {
         private readonly ITaskService _taskService;
-        private ObservableCollection<TaskEntry> _tasks = new();
+        private ObservableCollection<TaskEntryViewModel> _tasks = new();
         private string _searchText = "";
         private bool _isLoading;
         private string _taskCountText = "";
@@ -23,7 +25,7 @@ namespace TaskLogger.ViewModels
             LoadTasksAsync();
         }
 
-        public ObservableCollection<TaskEntry> Tasks
+        public ObservableCollection<TaskEntryViewModel> Tasks
         {
             get => _tasks;
             set => SetProperty(ref _tasks, value);
@@ -65,7 +67,8 @@ namespace TaskLogger.ViewModels
             try
             {
                 var tasks = await _taskService.GetTasksAsync();
-                Tasks = new ObservableCollection<TaskEntry>(tasks);
+                var viewModels = tasks.Select(t => new TaskEntryViewModel(t));
+                Tasks = new ObservableCollection<TaskEntryViewModel>(viewModels);
                 UpdateTaskCountText();
             }
             catch (Exception ex)
@@ -85,7 +88,8 @@ namespace TaskLogger.ViewModels
             try
             {
                 var tasks = await _taskService.SearchTasksAsync(SearchText);
-                Tasks = new ObservableCollection<TaskEntry>(tasks);
+                var viewModels = tasks.Select(t => new TaskEntryViewModel(t));
+                Tasks = new ObservableCollection<TaskEntryViewModel>(viewModels);
                 UpdateTaskCountText();
             }
             catch (Exception ex)
@@ -117,11 +121,8 @@ namespace TaskLogger.ViewModels
         {
             try
             {
-                if (!string.IsNullOrEmpty(format))
-                {
-                    // Trigger the event to let the view handle the file dialog
-                    ExportRequested?.Invoke(format);
-                }
+                // Trigger the event to let the view handle the file dialog
+                ExportRequested?.Invoke(format ?? "");
             }
             catch (Exception ex)
             {
@@ -129,6 +130,48 @@ namespace TaskLogger.ViewModels
                 throw;
             }
             await Task.CompletedTask;
+        }
+
+        public async Task ExportToFileAsync(string filePath)
+        {
+            try
+            {
+                await _taskService.ExportTasksAsync(filePath, Path.GetExtension(filePath));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error exporting to file: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task UpdateTaskAsync(TaskEntryViewModel taskViewModel)
+        {
+            try
+            {
+                await _taskService.UpdateTaskAsync(taskViewModel.TaskEntry);
+                await LoadTasksAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating task: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task DeleteTaskAsync(TaskEntryViewModel taskViewModel)
+        {
+            try
+            {
+                await _taskService.DeleteTaskAsync(taskViewModel.Id);
+                Tasks.Remove(taskViewModel);
+                UpdateTaskCountText();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error deleting task: {ex.Message}");
+                throw;
+            }
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -18,6 +18,7 @@ namespace TaskLogger.Services
         Task ExportTasksAsync(string filePath, string format);
         Task<int> GetTaskCountAsync();
         Task<List<TaskEntry>> GetRecentTasksAsync(int count = 10);
+        Task<TaskEntry?> GetTodayTaskAsync();
         string GetDatabasePath();
     }
 }
