@@ -113,15 +113,14 @@ namespace TaskLogger.ViewModels
             }
         }
 
-        private async Task ExportAsync(string? filePath)
+        private async Task ExportAsync(string? format)
         {
             try
             {
-                if (!string.IsNullOrEmpty(filePath))
+                if (!string.IsNullOrEmpty(format))
                 {
-                    var extension = System.IO.Path.GetExtension(filePath).ToLower();
-                    var format = extension == ".csv" ? "csv" : "txt";
-                    await _taskService.ExportTasksAsync(filePath, format);
+                    // Trigger the event to let the view handle the file dialog
+                    ExportRequested?.Invoke(format);
                 }
             }
             catch (Exception ex)
@@ -129,6 +128,7 @@ namespace TaskLogger.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Error exporting tasks: {ex.Message}");
                 throw;
             }
+            await Task.CompletedTask;
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

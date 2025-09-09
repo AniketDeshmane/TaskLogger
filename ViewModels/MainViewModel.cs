@@ -65,10 +65,11 @@ namespace TaskLogger.ViewModels
         public event Action? OpenSettings;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private async Task InitializeAsync()
+        private Task InitializeAsync()
         {
             DateText = DateTimeHelper.GetFormattedDate();
             IsWeekend = DateTimeHelper.IsWeekend();
+            return Task.CompletedTask;
         }
 
         private void SetupSystemEvents()

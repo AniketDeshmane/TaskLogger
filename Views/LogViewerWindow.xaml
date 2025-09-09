@@ -7,8 +7,7 @@
         Title="Task Logger - Debug Log Viewer" 
         Height="600" 
         Width="900"
-        WindowStartupLocation="CenterOwner"
-        Icon="/TaskLogger;component/icon.ico">
+        WindowStartupLocation="CenterOwner">
     
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
