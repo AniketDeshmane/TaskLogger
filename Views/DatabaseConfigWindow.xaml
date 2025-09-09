@@ -1,0 +1,148 @@
+<Window x:Class="TaskLogger.Views.DatabaseConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Database Configuration" 
+        Height="400" 
+        Width="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="🗄️ Database Configuration" 
+                          FontSize="24" 
+                          FontWeight="Bold" 
+                          Foreground="{StaticResource PrimaryBrush}"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,8"/>
+                <TextBlock Text="Choose where to store your task data" 
+                          FontSize="14" 
+                          Foreground="{StaticResource TextSecondaryBrush}"
+                          HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Configuration Content -->
+        <Border Grid.Row="1" Style="{StaticResource ModernCard}">
+            <StackPanel>
+                <TextBlock Text="Database Location" 
+                          FontSize="16" 
+                          FontWeight="SemiBold" 
+                          Foreground="{StaticResource TextBrush}"
+                          Margin="0,0,0,15"/>
+                
+                <TextBlock Text="Choose where Task Logger should store your task database:" 
+                          FontSize="14" 
+                          Foreground="{StaticResource TextSecondaryBrush}"
+                          TextWrapping="Wrap"
+                          Margin="0,0,0,15"/>
+                
+                <!-- Database Path Input -->
+                <StackPanel Margin="0,0,0,15">
+                    <TextBlock Text="Database File Path:" 
+                              FontSize="14" 
+                              FontWeight="SemiBold"
+                              Margin="0,0,0,5"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" 
+                                x:Name="DatabasePathTextBox" 
+                                Style="{StaticResource ModernTextBox}"
+                                Text="{Binding DatabasePath, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,10,0"/>
+                        <Button Grid.Column="1" 
+                               Content="📁 Browse" 
+                               Style="{StaticResource ModernButton}"
+                               Click="BrowseButton_Click"
+                               Background="{StaticResource SecondaryBrush}"/>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- Path Validation -->
+                <Border Background="{Binding PathValidationBrush}" 
+                        CornerRadius="6" 
+                        Padding="10" 
+                        Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="{Binding PathValidationMessage}" 
+                                  FontSize="12" 
+                                  Foreground="{Binding PathValidationTextBrush}"
+                                  TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Options -->
+                <GroupBox Header="Options" 
+                         FontWeight="SemiBold" 
+                         Foreground="{StaticResource TextBrush}"
+                         Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <CheckBox x:Name="CreateBackupCheckBox" 
+                                 Content="Create backup of existing database (if found)" 
+                                 FontSize="14"
+                                 IsChecked="True"
+                                 Margin="0,0,0,10"/>
+                        <TextBlock Text="Automatically backup your existing task data before moving" 
+                                  FontSize="12" 
+                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  TextWrapping="Wrap"/>
+                    </StackPanel>
+                </GroupBox>
+                
+                <!-- Migration Info -->
+                <Border Background="{StaticResource CardBrush}" 
+                        BorderBrush="{StaticResource PrimaryBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="6" 
+                        Padding="10">
+                    <StackPanel>
+                        <TextBlock Text="ℹ️ Migration Information" 
+                                  FontSize="12" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="{StaticResource PrimaryBrush}"
+                                  Margin="0,0,0,5"/>
+                        <TextBlock Text="If you have existing task data, it will be automatically migrated to the new location. The original database will be backed up for safety." 
+                                  FontSize="11" 
+                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                  TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+        
+        <!-- Footer Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                   HorizontalAlignment="Right" 
+                   Margin="0,20,0,0">
+            <Button x:Name="UseDefaultButton" 
+                   Content="Use Default Location" 
+                   Style="{StaticResource ModernButton}"
+                   Click="UseDefaultButton_Click"
+                   Margin="0,0,10,0"
+                   Background="{StaticResource SecondaryBrush}"/>
+            <Button x:Name="SaveButton" 
+                   Content="💾 Save & Continue" 
+                   Style="{StaticResource ModernButton}"
+                   Click="SaveButton_Click"
+                   Margin="0,0,10,0"/>
+            <Button x:Name="CancelButton" 
+                   Content="Cancel" 
+                   Style="{StaticResource ModernButton}"
+                   Click="CancelButton_Click"
+                   Background="{StaticResource ErrorBrush}"/>
+        </StackPanel>
+    </Grid>
+</Window>

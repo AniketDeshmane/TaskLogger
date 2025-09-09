@@ -1,0 +1,129 @@
+name: Build and Publish Task Logger
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [ published ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_NAME: 'TaskLogger'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_NAME }}.csproj
+      
+    - name: Build application
+      run: dotnet build ${{ env.PROJECT_NAME }}.csproj --configuration Release --no-restore
+      
+    - name: Run tests (if any)
+      run: dotnet test --configuration Release --no-build --verbosity normal
+      continue-on-error: true
+      
+    - name: Publish application
+      run: dotnet publish ${{ env.PROJECT_NAME }}.csproj --configuration Release --no-build --output ./publish --self-contained true --runtime win-x64
+      
+    - name: Create release artifacts
+      run: |
+        # Create a zip file with the published application
+        Compress-Archive -Path "./publish/*" -DestinationPath "./TaskLogger-Windows-x64.zip" -Force
+        
+        # Create installer script
+        @"
+        @echo off
+        echo Installing Task Logger...
+        echo.
+        
+        set INSTALL_DIR=%USERPROFILE%\TaskLogger
+        
+        if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+        
+        echo Copying files...
+        xcopy /E /I /Y "%~dp0*" "%INSTALL_DIR%\"
+        
+        echo.
+        echo Task Logger installed successfully!
+        echo Location: %INSTALL_DIR%
+        echo.
+        echo You can now run TaskLogger.exe from the installation directory.
+        echo.
+        pause
+        "@ | Out-File -FilePath "./install.bat" -Encoding ASCII
+        
+        # Add installer to zip
+        Compress-Archive -Path "./TaskLogger-Windows-x64.zip", "./install.bat" -DestinationPath "./TaskLogger-Installer.zip" -Force
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: TaskLogger-Build-${{ github.run_number }}
+        path: |
+          ./TaskLogger-Windows-x64.zip
+          ./TaskLogger-Installer.zip
+        retention-days: 30
+
+  publish-release:
+    needs: build
+    runs-on: windows-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: TaskLogger-Build-${{ github.run_number }}
+        path: ./artifacts
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./artifacts/TaskLogger-Windows-x64.zip
+          ./artifacts/TaskLogger-Installer.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-package:
+    needs: build
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_NAME }}.csproj
+      
+    - name: Build and pack
+      run: dotnet pack ${{ env.PROJECT_NAME }}.csproj --configuration Release --no-restore --output ./packages
+      
+    - name: Publish to GitHub Packages
+      run: dotnet nuget push "./packages/*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+      continue-on-error: true
