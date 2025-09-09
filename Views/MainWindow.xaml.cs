@@ -220,7 +220,8 @@ namespace TaskLogger.Views
             {
                 _logger.LogInfo("Showing database configuration window");
                 var configWindow = new DatabaseConfigWindow();
-                configWindow.Owner = this;
+                // Don't set Owner since MainWindow hasn't been shown yet
+                configWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
                 
                 var result = configWindow.ShowDialog();
                 if (result != true)
