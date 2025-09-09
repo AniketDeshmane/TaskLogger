@@ -91,7 +91,13 @@
                     <Button Content="⚙️ Settings" 
                            Style="{StaticResource ModernButton}"
                            Command="{Binding OpenSettingsCommand}"
-                           Background="{StaticResource AccentBrush}"/>
+                           Background="{StaticResource AccentBrush}"
+                           Margin="0,0,10,0"/>
+                    <Button Content="🐛 Debug Logs" 
+                           Style="{StaticResource ModernButton}"
+                           Click="DebugLogsButton_Click"
+                           Background="#95A5A6"
+                           ToolTip="View application debug logs"/>
                 </StackPanel>
             </Grid>
         </Border>

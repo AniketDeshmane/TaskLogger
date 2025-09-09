@@ -13,6 +13,9 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <StartupObject>TaskLogger.App</StartupObject>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>

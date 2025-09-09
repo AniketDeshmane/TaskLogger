@@ -8,25 +8,48 @@ namespace TaskLogger.Services
     public class DatabaseService
     {
         private readonly TaskLoggerDbContext _context;
+        private readonly ILoggingService _logger;
 
         public DatabaseService()
         {
-            _context = new TaskLoggerDbContext();
+            _logger = LoggingService.Instance;
+            _logger.LogDebug("DatabaseService constructor called");
+            
+            try
+            {
+                _context = new TaskLoggerDbContext();
+                _logger.LogDebug("TaskLoggerDbContext created successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create TaskLoggerDbContext");
+                throw;
+            }
         }
 
         public async Task InitializeDatabaseAsync()
         {
             try
             {
+                _logger.LogInfo("Starting database initialization");
+                
+                // Log connection string (without sensitive data)
+                var connectionString = _context.Database.GetConnectionString();
+                _logger.LogDebug($"Database connection string: {connectionString}");
+                
                 // Ensure database is created
-                await _context.Database.EnsureCreatedAsync();
+                _logger.LogInfo("Ensuring database exists...");
+                var created = await _context.Database.EnsureCreatedAsync();
+                _logger.LogInfo(created ? "Database created successfully" : "Database already exists");
                 
                 // Check if we need to migrate from old file-based system
                 await MigrateFromFileSystemAsync();
+                
+                _logger.LogInfo("Database initialization completed successfully");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error initializing database: {ex.Message}");
+                _logger.LogError(ex, "Error initializing database");
                 throw;
             }
         }
@@ -35,15 +58,23 @@ namespace TaskLogger.Services
         {
             try
             {
+                _logger.LogInfo("Checking for old file-based logs to migrate");
                 var oldLogFile = GetOldLogFilePath();
+                _logger.LogDebug($"Looking for old log file at: {oldLogFile}");
+                
                 if (System.IO.File.Exists(oldLogFile))
                 {
+                    _logger.LogInfo($"Found old log file to migrate: {oldLogFile}");
                     var lines = await System.IO.File.ReadAllLinesAsync(oldLogFile);
+                    _logger.LogInfo($"Read {lines.Length} lines from old log file");
+                    
                     var hasExistingData = await _context.Tasks.AnyAsync();
                     
                     // Only migrate if database is empty
                     if (!hasExistingData)
                     {
+                        _logger.LogInfo("Database is empty, starting migration");
+                        int migratedCount = 0;
                         foreach (var line in lines)
                         {
                             if (string.IsNullOrWhiteSpace(line)) continue;
@@ -67,21 +98,32 @@ namespace TaskLogger.Services
                                     };
 
                                     _context.Tasks.Add(taskEntry);
+                                    migratedCount++;
                                 }
                             }
                         }
                         
                         await _context.SaveChangesAsync();
+                        _logger.LogInfo($"Successfully migrated {migratedCount} tasks to database");
                         
                         // Backup the old file
                         var backupFile = oldLogFile + ".backup";
                         System.IO.File.Move(oldLogFile, backupFile);
+                        _logger.LogInfo($"Old log file backed up to: {backupFile}");
                     }
+                    else
+                    {
+                        _logger.LogInfo("Database already has data, skipping migration");
+                    }
+                }
+                else
+                {
+                    _logger.LogDebug("No old log file found, nothing to migrate");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error migrating from file system: {ex.Message}");
+                _logger.LogWarning($"Error migrating from file system: {ex.Message}");
                 // Don't throw - migration failure shouldn't break the app
             }
         }
@@ -126,6 +168,7 @@ namespace TaskLogger.Services
 
         public void Dispose()
         {
+            _logger.LogDebug("DatabaseService.Dispose called");
             _context?.Dispose();
         }
     }

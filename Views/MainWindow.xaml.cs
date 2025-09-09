@@ -13,62 +13,141 @@ namespace TaskLogger.Views
         private readonly IStartupService _startupService;
         private readonly IBackgroundService _backgroundService;
         private readonly IDatabaseConfigService _databaseConfigService;
+        private readonly ILoggingService _logger;
 
         public MainWindow()
         {
-            InitializeComponent();
+            _logger = LoggingService.Instance;
+            _logger.LogInfo("MainWindow constructor started");
             
-            // Initialize services
-            _systemTrayService = new SystemTrayService();
-            _startupPromptService = new StartupPromptService();
-            _startupService = new StartupService();
-            _databaseConfigService = new DatabaseConfigService();
+            try
+            {
+                _logger.LogInfo("Calling InitializeComponent");
+                InitializeComponent();
+                _logger.LogInfo("InitializeComponent completed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogFatal(ex, "Failed to initialize MainWindow components");
+                MessageBox.Show($"Failed to initialize window: {ex.Message}\n\nCheck the log file for details.", 
+                              "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw;
+            }
+            
+            try
+            {
+                // Initialize services
+                _logger.LogInfo("Initializing services...");
+                
+                _logger.LogDebug("Creating SystemTrayService");
+                _systemTrayService = new SystemTrayService();
+                
+                _logger.LogDebug("Creating StartupPromptService");
+                _startupPromptService = new StartupPromptService();
+                
+                _logger.LogDebug("Creating StartupService");
+                _startupService = new StartupService();
+                
+                _logger.LogDebug("Creating DatabaseConfigService");
+                _databaseConfigService = new DatabaseConfigService();
+                
+                _logger.LogInfo("All services initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogFatal(ex, "Failed to initialize services");
+                MessageBox.Show($"Failed to initialize services: {ex.Message}", "Fatal Error", 
+                              MessageBoxButton.OK, MessageBoxImage.Error);
+                throw;
+            }
             
             // Check database configuration first
-            if (!_databaseConfigService.IsDatabasePathConfigured())
+            try
             {
-                ShowDatabaseConfiguration();
+                _logger.LogInfo("Checking database configuration");
+                if (!_databaseConfigService.IsDatabasePathConfigured())
+                {
+                    _logger.LogInfo("Database path not configured, showing configuration window");
+                    ShowDatabaseConfiguration();
+                }
+                else
+                {
+                    _logger.LogInfo($"Database already configured at: {_databaseConfigService.GetDatabasePath()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking database configuration");
+                MessageBox.Show($"Error checking database configuration: {ex.Message}", "Error", 
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             
             // Initialize database
+            _logger.LogInfo("Starting database initialization");
             InitializeDatabaseAsync();
             
             // Initialize other services
-            var taskService = new TaskService();
-            var systemEventService = new SystemEventService();
+            try
+            {
+                _logger.LogInfo("Creating TaskService");
+                var taskService = new TaskService();
+                
+                _logger.LogInfo("Creating SystemEventService");
+                var systemEventService = new SystemEventService();
             
-            // Initialize background service
-            _backgroundService = new BackgroundService(systemEventService, taskService, _systemTrayService);
+                // Initialize background service
+                _logger.LogInfo("Creating BackgroundService");
+                _backgroundService = new BackgroundService(systemEventService, taskService, _systemTrayService);
             
-            // Initialize ViewModel
-            _viewModel = new MainViewModel(taskService, systemEventService);
-            DataContext = _viewModel;
+                // Initialize ViewModel
+                _logger.LogInfo("Creating MainViewModel");
+                _viewModel = new MainViewModel(taskService, systemEventService);
+                DataContext = _viewModel;
+                _logger.LogInfo("DataContext set to MainViewModel");
             
-            // Subscribe to ViewModel events
-            _viewModel.ViewHistory += OnViewHistory;
-            _viewModel.OpenSettings += OnOpenSettings;
+                // Subscribe to ViewModel events
+                _logger.LogInfo("Subscribing to ViewModel events");
+                _viewModel.ViewHistory += OnViewHistory;
+                _viewModel.OpenSettings += OnOpenSettings;
             
-            // Initialize system tray
-            InitializeSystemTray();
+                // Initialize system tray
+                _logger.LogInfo("Initializing system tray");
+                InitializeSystemTray();
             
-            // Start background service
-            _backgroundService.Start();
-            _backgroundService.TaskPromptRequested += OnTaskPromptRequested;
+                // Start background service
+                _logger.LogInfo("Starting background service");
+                _backgroundService.Start();
+                _backgroundService.TaskPromptRequested += OnTaskPromptRequested;
+                _logger.LogInfo("Background service started");
             
-            // Check for startup prompt
-            CheckStartupPrompt();
+                // Check for startup prompt
+                _logger.LogInfo("Checking startup prompt");
+                CheckStartupPrompt();
+                
+                _logger.LogInfo("MainWindow initialization completed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogFatal(ex, "Fatal error during MainWindow initialization");
+                MessageBox.Show($"Fatal error during initialization: {ex.Message}\n\nThe application will now close.", 
+                              "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Shutdown(1);
+            }
         }
 
         private async void InitializeDatabaseAsync()
         {
             try
             {
+                _logger.LogInfo("InitializeDatabaseAsync started");
                 var databaseService = new DatabaseService();
                 await databaseService.InitializeDatabaseAsync();
                 databaseService.Dispose();
+                _logger.LogInfo("Database initialized successfully");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error initializing database");
                 MessageBox.Show($"Error initializing database: {ex.Message}", "Database Error", 
                               MessageBoxButton.OK, MessageBoxImage.Warning);
             }
@@ -102,40 +181,98 @@ namespace TaskLogger.Views
             }
         }
 
+        private void DebugLogsButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _logger.LogInfo("Opening debug log viewer window");
+                var logViewerWindow = new LogViewerWindow();
+                logViewerWindow.Owner = this;
+                logViewerWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error opening log viewer");
+                MessageBox.Show($"Error opening log viewer: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void InitializeSystemTray()
         {
-            _systemTrayService.Initialize();
-            _systemTrayService.ShowRequested += OnShowFromTray;
-            _systemTrayService.ExitRequested += OnExitRequested;
+            try
+            {
+                _logger.LogDebug("Initializing system tray service");
+                _systemTrayService.Initialize();
+                _systemTrayService.ShowRequested += OnShowFromTray;
+                _systemTrayService.ExitRequested += OnExitRequested;
+                _logger.LogDebug("System tray initialized and events subscribed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize system tray");
+                throw;
+            }
         }
 
         private void ShowDatabaseConfiguration()
         {
-            var configWindow = new DatabaseConfigWindow();
-            configWindow.Owner = this;
-            
-            var result = configWindow.ShowDialog();
-            if (result != true)
+            try
             {
-                // User cancelled, use default path
-                _databaseConfigService.SetDatabasePath(_databaseConfigService.GetDefaultDatabasePath());
+                _logger.LogInfo("Showing database configuration window");
+                var configWindow = new DatabaseConfigWindow();
+                configWindow.Owner = this;
+                
+                var result = configWindow.ShowDialog();
+                if (result != true)
+                {
+                    // User cancelled, use default path
+                    var defaultPath = _databaseConfigService.GetDefaultDatabasePath();
+                    _logger.LogInfo($"User cancelled, using default path: {defaultPath}");
+                    _databaseConfigService.SetDatabasePath(defaultPath);
+                }
+                else
+                {
+                    _logger.LogInfo($"Database path configured: {_databaseConfigService.GetDatabasePath()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error showing database configuration");
+                throw;
             }
         }
 
         private void CheckStartupPrompt()
         {
-            if (_startupPromptService.ShouldPromptForStartup())
+            try
             {
-                _startupPromptService.PromptForStartup(shouldEnable =>
+                if (_startupPromptService.ShouldPromptForStartup())
                 {
-                    if (shouldEnable)
+                    _logger.LogInfo("Showing startup prompt to user");
+                    _startupPromptService.PromptForStartup(shouldEnable =>
                     {
-                        _startupService.EnableStartup();
-                        _systemTrayService.ShowBalloonTip("Task Logger", 
-                            "Task Logger will now start automatically with Windows!", 
-                            BalloonIcon.Info);
-                    }
-                });
+                        if (shouldEnable)
+                        {
+                            _logger.LogInfo("User chose to enable startup with Windows");
+                            _startupService.EnableStartup();
+                            _systemTrayService.ShowBalloonTip("Task Logger", 
+                                "Task Logger will now start automatically with Windows!", 
+                                BalloonIcon.Info);
+                        }
+                        else
+                        {
+                            _logger.LogInfo("User chose not to enable startup with Windows");
+                        }
+                    });
+                }
+                else
+                {
+                    _logger.LogDebug("Startup prompt not needed");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking startup prompt");
             }
         }
 
@@ -199,10 +336,26 @@ namespace TaskLogger.Views
 
         protected override void OnClosed(EventArgs e)
         {
-            _backgroundService?.Stop();
-            _backgroundService?.Dispose();
-            _viewModel?.Dispose();
-            _systemTrayService?.Dispose();
+            _logger.LogInfo("MainWindow OnClosed called");
+            
+            try
+            {
+                _backgroundService?.Stop();
+                _backgroundService?.Dispose();
+                _logger.LogDebug("Background service stopped and disposed");
+                
+                _viewModel?.Dispose();
+                _logger.LogDebug("ViewModel disposed");
+                
+                _systemTrayService?.Dispose();
+                _logger.LogDebug("System tray service disposed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during MainWindow cleanup");
+            }
+            
+            _logger.LogInfo("MainWindow closed");
             base.OnClosed(e);
         }
     }
