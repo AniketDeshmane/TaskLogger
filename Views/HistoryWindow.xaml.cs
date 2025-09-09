@@ -38,7 +38,7 @@ namespace TaskLogger.Views
 
                 if (saveDialog.ShowDialog() == true)
                 {
-                    await _viewModel.ExportCommand.Execute(saveDialog.FileName);
+                    _viewModel.ExportCommand.Execute(saveDialog.FileName);
                     MessageBox.Show($"History exported successfully to:\n{saveDialog.FileName}", 
                                   "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -47,6 +47,11 @@ namespace TaskLogger.Views
             {
                 MessageBox.Show($"Error exporting history: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

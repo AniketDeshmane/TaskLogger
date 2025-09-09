@@ -28,7 +28,7 @@ namespace TaskLogger.Services
         {
             try
             {
-                var executablePath = Assembly.GetExecutingAssembly().Location;
+                var executablePath = Path.Combine(AppContext.BaseDirectory, "TaskLogger.exe");
                 using var key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, true);
                 key?.SetValue(AppName, executablePath);
             }

@@ -99,20 +99,20 @@ namespace TaskLogger.Views
                 if (File.Exists(_databasePath))
                 {
                     var fileInfo = new FileInfo(_databasePath);
-                    PathValidationMessage.Text = $"✅ Valid path. Existing database found ({fileInfo.Length / 1024} KB, modified {fileInfo.LastWriteTime:yyyy-MM-dd HH:mm})";
+                    PathValidationMessage = $"✅ Valid path. Existing database found ({fileInfo.Length / 1024} KB, modified {fileInfo.LastWriteTime:yyyy-MM-dd HH:mm})";
                     PathValidationBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightGreen);
                     PathValidationTextBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DarkGreen);
                 }
                 else
                 {
-                    PathValidationMessage.Text = "✅ Valid path. New database will be created.";
+                    PathValidationMessage = "✅ Valid path. New database will be created.";
                     PathValidationBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightBlue);
                     PathValidationTextBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DarkBlue);
                 }
             }
             else
             {
-                PathValidationMessage.Text = "❌ Invalid path. Please choose a valid location.";
+                PathValidationMessage = "❌ Invalid path. Please choose a valid location.";
                 PathValidationBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightCoral);
                 PathValidationTextBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DarkRed);
             }

@@ -26,7 +26,6 @@ namespace TaskLogger.Services
             {
                 SessionEndReasons.Logoff => "User Logoff",
                 SessionEndReasons.SystemShutdown => "System Shutdown",
-                SessionEndReasons.SystemReboot => "System Reboot",
                 _ => "Unknown"
             };
 

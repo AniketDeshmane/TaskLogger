@@ -26,8 +26,7 @@ namespace TaskLogger.Services
                 _taskbarIcon = new TaskbarIcon();
                 _taskbarIcon.Icon = GetApplicationIcon();
                 _taskbarIcon.ToolTipText = "Task Logger - Click to show/hide";
-                _taskbarIcon.TrayLeftMouseClick += OnTrayLeftClick;
-                _taskbarIcon.TrayRightMouseClick += OnTrayRightClick;
+                _taskbarIcon.TrayMouseDoubleClick += OnTrayLeftClick;
 
                 // Create context menu
                 _taskbarIcon.ContextMenu = CreateContextMenu();

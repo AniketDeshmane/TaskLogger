@@ -2,7 +2,7 @@ using System;
 
 namespace TaskLogger.Services
 {
-    public interface ISystemTrayService
+    public interface ISystemTrayService : IDisposable
     {
         void Initialize();
         void ShowBalloonTip(string title, string message, BalloonIcon icon = BalloonIcon.Info);

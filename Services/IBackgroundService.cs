@@ -2,7 +2,7 @@ using System;
 
 namespace TaskLogger.Services
 {
-    public interface IBackgroundService
+    public interface IBackgroundService : IDisposable
     {
         void Start();
         void Stop();

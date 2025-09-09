@@ -18,6 +18,11 @@ namespace TaskLogger.Services
             _context.Database.EnsureCreated();
         }
 
+        public TaskService(TaskLoggerDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task SaveTaskAsync(string task, string? eventType = null, string? notes = null)
         {
             var taskEntry = new TaskEntry

@@ -134,7 +134,7 @@
                    Margin="0,0,10,0"
                    Background="{StaticResource SecondaryBrush}"/>
             <Button x:Name="SaveButton" 
-                   Content="💾 Save & Continue" 
+                   Content="💾 Save &amp; Continue" 
                    Style="{StaticResource ModernButton}"
                    Click="SaveButton_Click"
                    Margin="0,0,10,0"/>
