@@ -187,42 +187,98 @@ namespace TaskLogger.Services
             await writer.WriteLineAsync(new string('=', 50));
             await writer.WriteLineAsync();
 
-            foreach (var task in tasks)
+            // Group tasks by date and concatenate same-day logs with pipe separator
+            var groupedTasks = tasks.GroupBy(t => t.CreatedAt.Date)
+                                   .OrderByDescending(g => g.Key);
+
+            foreach (var dateGroup in groupedTasks)
             {
-                var eventInfo = !string.IsNullOrEmpty(task.EventType) ? $"[{task.EventType}] " : "";
-                var notesInfo = !string.IsNullOrEmpty(task.Notes) ? $" ({task.Notes})" : "";
-                await writer.WriteLineAsync($"{task.Timestamp} - {eventInfo}{task.Task}{notesInfo}");
+                var date = dateGroup.Key.ToString("yyyy-MM-dd");
+                var dayTasks = dateGroup.OrderBy(t => t.CreatedAt).ToList();
+                
+                if (dayTasks.Count == 1)
+                {
+                    var task = dayTasks[0];
+                    var eventInfo = !string.IsNullOrEmpty(task.EventType) ? $"[{task.EventType}] " : "";
+                    await writer.WriteLineAsync($"{date} {task.CreatedAt:HH:mm:ss} - {eventInfo}{task.Task}");
+                }
+                else
+                {
+                    // Concatenate multiple tasks for the same day with pipe separator
+                    var concatenatedTasks = string.Join(" | ", dayTasks.Select(t => 
+                    {
+                        var eventInfo = !string.IsNullOrEmpty(t.EventType) ? $"[{t.EventType}] " : "";
+                        return $"{t.CreatedAt:HH:mm:ss} - {eventInfo}{t.Task}";
+                    }));
+                    await writer.WriteLineAsync($"{date}: {concatenatedTasks}");
+                }
             }
         }
 
         private async Task ExportToCsvAsync(string filePath, List<TaskEntry> tasks)
         {
             using var writer = new StreamWriter(filePath);
-            await writer.WriteLineAsync("Id,Date,Time,Task,EventType,Notes");
+            await writer.WriteLineAsync("Date,Tasks,EventTypes");
             
-            foreach (var task in tasks)
+            // Group tasks by date and concatenate same-day logs
+            var groupedTasks = tasks.GroupBy(t => t.CreatedAt.Date)
+                                   .OrderByDescending(g => g.Key);
+            
+            foreach (var dateGroup in groupedTasks)
             {
-                var escapedTask = task.Task.Replace("\"", "\"\"");
-                var escapedNotes = (task.Notes ?? "").Replace("\"", "\"\"");
-                var eventType = task.EventType ?? "Manual";
+                var date = dateGroup.Key.ToString("yyyy-MM-dd");
+                var dayTasks = dateGroup.OrderBy(t => t.CreatedAt).ToList();
                 
-                await writer.WriteLineAsync($"\"{task.Id}\",\"{task.CreatedAt:yyyy-MM-dd}\",\"{task.CreatedAt:HH:mm:ss}\",\"{escapedTask}\",\"{eventType}\",\"{escapedNotes}\"");
+                // Concatenate tasks with pipe separator
+                var concatenatedTasks = string.Join(" | ", dayTasks.Select(t => 
+                {
+                    return $"{t.CreatedAt:HH:mm:ss} - {t.Task}";
+                }));
+                
+                // Get unique event types for the day
+                var eventTypes = string.Join(", ", dayTasks
+                    .Where(t => !string.IsNullOrEmpty(t.EventType))
+                    .Select(t => t.EventType)
+                    .Distinct());
+                
+                var escapedTasks = concatenatedTasks.Replace("\"", "\"\"");
+                var escapedEventTypes = eventTypes.Replace("\"", "\"\"");
+                
+                await writer.WriteLineAsync($"\"{date}\",\"{escapedTasks}\",\"{escapedEventTypes}\"");
             }
         }
 
         private async Task ExportToJsonAsync(string filePath, List<TaskEntry> tasks)
         {
-            var jsonData = tasks.Select(t => new
+            // Group tasks by date and concatenate same-day logs
+            var groupedTasks = tasks.GroupBy(t => t.CreatedAt.Date)
+                                   .OrderByDescending(g => g.Key)
+                                   .Select(dateGroup => 
             {
-                t.Id,
-                Date = t.CreatedAt.ToString("yyyy-MM-dd"),
-                Time = t.CreatedAt.ToString("HH:mm:ss"),
-                t.Task,
-                EventType = t.EventType ?? "Manual",
-                Notes = t.Notes ?? ""
+                var dayTasks = dateGroup.OrderBy(t => t.CreatedAt).ToList();
+                
+                return new
+                {
+                    Date = dateGroup.Key.ToString("yyyy-MM-dd"),
+                    TaskCount = dayTasks.Count,
+                    Tasks = string.Join(" | ", dayTasks.Select(t => 
+                        $"{t.CreatedAt:HH:mm:ss} - {t.Task}")),
+                    EventTypes = dayTasks
+                        .Where(t => !string.IsNullOrEmpty(t.EventType))
+                        .Select(t => t.EventType)
+                        .Distinct()
+                        .ToList(),
+                    Details = dayTasks.Select(t => new
+                    {
+                        Time = t.CreatedAt.ToString("HH:mm:ss"),
+                        t.Task,
+                        EventType = t.EventType ?? "Manual",
+                        Notes = t.Notes ?? ""
+                    })
+                };
             });
 
-            var json = System.Text.Json.JsonSerializer.Serialize(jsonData, new System.Text.Json.JsonSerializerOptions 
+            var json = System.Text.Json.JsonSerializer.Serialize(groupedTasks, new System.Text.Json.JsonSerializerOptions 
             { 
                 WriteIndented = true 
             });

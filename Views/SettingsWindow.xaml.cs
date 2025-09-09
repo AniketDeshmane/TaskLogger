@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Input;
 using TaskLogger.ViewModels;
 using TaskLogger.Services;
 
@@ -32,6 +33,16 @@ namespace TaskLogger.Views
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+        
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+        
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }

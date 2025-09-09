@@ -90,12 +90,7 @@ namespace TaskLogger.Services
             var showItem = new MenuItem
             {
                 Header = "Show Task Logger",
-                Icon = new System.Windows.Controls.Image
-                {
-                    Source = new BitmapImage(new Uri("pack://application:,,,/TaskLogger;component/Resources/icon.ico")),
-                    Width = 16,
-                    Height = 16
-                }
+                Icon = new System.Windows.Controls.TextBlock { Text = "📝", FontSize = 12 }
             };
             showItem.Click += (s, e) => ShowRequested?.Invoke(this, EventArgs.Empty);
 
@@ -103,10 +98,22 @@ namespace TaskLogger.Services
 
             var exitItem = new MenuItem
             {
-                Header = "Exit",
+                Header = "Exit Completely",
                 Icon = new System.Windows.Controls.TextBlock { Text = "❌", FontSize = 12 }
             };
-            exitItem.Click += (s, e) => ExitRequested?.Invoke(this, EventArgs.Empty);
+            exitItem.Click += (s, e) => 
+            {
+                var result = MessageBox.Show(
+                    "Are you sure you want to exit Task Logger completely?\n\nThis will stop the background service.",
+                    "Exit Task Logger",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                    
+                if (result == MessageBoxResult.Yes)
+                {
+                    ExitRequested?.Invoke(this, EventArgs.Empty);
+                }
+            };
 
             contextMenu.Items.Add(showItem);
             contextMenu.Items.Add(separator1);
