@@ -15,6 +15,22 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <StartupObject>TaskLogger.App</StartupObject>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    
+    <!-- Package Metadata -->
+    <PackageId>TaskLogger</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>TaskLogger Contributors</Authors>
+    <Company>TaskLogger</Company>
+    <Product>Task Logger</Product>
+    <Description>A beautiful WPF task logging application that helps track daily tasks and integrates with system events</Description>
+    <Copyright>Copyright © 2024</Copyright>
+    <PackageTags>task;logger;wpf;productivity;windows</PackageTags>
+    <PackageProjectUrl>https://github.com/yourusername/TaskLogger</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yourusername/TaskLogger</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +45,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
