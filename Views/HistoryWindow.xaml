@@ -64,8 +64,13 @@
                                 <Border Background="{StaticResource CardBrush}" 
                                         CornerRadius="8" 
                                         Padding="15" 
-                                        Margin="0,0,0,10"
-                                        Effect="{StaticResource {x:Static SystemParameters.DropShadowKey}}">
+                                        Margin="0,0,0,10">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" 
+                                                        Opacity="0.1" 
+                                                        BlurRadius="8" 
+                                                        ShadowDepth="2"/>
+                                    </Border.Effect>
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                             <TextBlock Text="{Binding Timestamp}" 
