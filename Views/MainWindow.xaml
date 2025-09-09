@@ -7,7 +7,6 @@
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}"
         ResizeMode="CanMinimize"
-        WindowStyle="SingleBorderWindow"
         StateChanged="MainWindow_StateChanged"
         Closing="MainWindow_Closing"
         ShowInTaskbar="{Binding ShowInTaskbar, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
