@@ -1,11 +1,14 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using TaskLogger.ViewModels;
 using TaskLogger.Services;
 
 namespace TaskLogger.Views
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private readonly MainViewModel _viewModel;
         private readonly ISystemTrayService _systemTrayService;
@@ -14,6 +17,25 @@ namespace TaskLogger.Views
         private readonly IBackgroundService _backgroundService;
         private readonly IDatabaseConfigService _databaseConfigService;
         private readonly ILoggingService _logger;
+        private readonly IThemeService _themeService;
+        private bool _showInTaskbar = true;
+        
+        public bool ShowInTaskbar
+        {
+            get => _showInTaskbar;
+            set
+            {
+                if (_showInTaskbar != value)
+                {
+                    _showInTaskbar = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        
+        public bool IsDarkMode => _themeService?.IsDarkMode ?? false;
+        
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindow()
         {
@@ -50,6 +72,10 @@ namespace TaskLogger.Views
                 
                 _logger.LogDebug("Creating DatabaseConfigService");
                 _databaseConfigService = new DatabaseConfigService();
+                
+                _logger.LogDebug("Creating ThemeService");
+                _themeService = new ThemeService();
+                _themeService.LoadThemePreference();
                 
                 _logger.LogInfo("All services initialized successfully");
             }
@@ -309,6 +335,7 @@ namespace TaskLogger.Views
         private void OnShowFromTray(object? sender, EventArgs e)
         {
             Show();
+            ShowInTaskbar = true;
             WindowState = WindowState.Normal;
             Activate();
             _systemTrayService.ShowFromTray();
@@ -316,7 +343,9 @@ namespace TaskLogger.Views
 
         private void OnExitRequested(object? sender, EventArgs e)
         {
-            Close();
+            // Force close the application
+            _systemTrayService?.Dispose();
+            Application.Current.Shutdown();
         }
 
         private void OnTaskPromptRequested(object? sender, TaskPromptEventArgs e)
@@ -337,31 +366,52 @@ namespace TaskLogger.Views
             if (WindowState == WindowState.Minimized)
             {
                 Hide();
+                ShowInTaskbar = false;
                 _systemTrayService.HideToTray();
+            }
+        }
+        
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+            }
+            else
+            {
+                DragMove();
+            }
+        }
+        
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+        
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+        
+        private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (_themeService != null && sender is System.Windows.Controls.Primitives.ToggleButton toggle)
+            {
+                _themeService.IsDarkMode = toggle.IsChecked ?? false;
+                OnPropertyChanged(nameof(IsDarkMode));
             }
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // Ask user if they want to minimize to tray or exit
-            var result = MessageBox.Show(
-                "Do you want to minimize Task Logger to the system tray?\n\n" +
-                "Click 'Yes' to keep it running in the background, or 'No' to exit completely.",
-                "Task Logger",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question,
-                MessageBoxResult.Yes);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                e.Cancel = true;
-                Hide();
-                _systemTrayService.HideToTray();
-            }
-            else
-            {
-                _systemTrayService.Dispose();
-            }
+            // Always minimize to tray on close to keep background service running
+            e.Cancel = true;
+            Hide();
+            ShowInTaskbar = false;
+            _systemTrayService.HideToTray();
+            _systemTrayService.ShowBalloonTip("Task Logger", 
+                "Task Logger is still running in the background. Right-click the tray icon to exit.", 
+                BalloonIcon.Info);
         }
 
         protected override void OnClosed(EventArgs e)
@@ -387,6 +437,11 @@ namespace TaskLogger.Views
             
             _logger.LogInfo("MainWindow closed");
             base.OnClosed(e);
+        }
+        
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

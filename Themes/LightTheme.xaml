@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- Light Mode Color Palette -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#2E86AB"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#A23B72"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#F18F01"/>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#F5F7FA"/>
+    <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="GlassBrush" Color="#FAFBFC"/>
+    <SolidColorBrush x:Key="TextBrush" Color="#2C3E50"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#7F8C8D"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="#27AE60"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="#E74C3C"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0"/>
+    
+    <!-- Glass Effect Brush -->
+    <LinearGradientBrush x:Key="GlassGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#1AFFFFFF" Offset="0"/>
+        <GradientStop Color="#33FFFFFF" Offset="0.5"/>
+        <GradientStop Color="#1AFFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    
+</ResourceDictionary>

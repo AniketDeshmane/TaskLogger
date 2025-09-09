@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Input;
 using TaskLogger.ViewModels;
 using TaskLogger.Services;
 
@@ -109,6 +110,11 @@ namespace TaskLogger.Views
                     }
                 }
             }
+        }
+        
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
         }
     }
 }
