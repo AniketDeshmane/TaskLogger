@@ -15,14 +15,6 @@ namespace TaskLogger
         {
             try
             {
-                // Check for console test mode
-                if (e.Args.Length > 0 && e.Args[0] == "--test-console")
-                {
-                    TestConsole.RunTest();
-                    Shutdown(0);
-                    return;
-                }
-
                 // Initialize logging first
                 _logger = LoggingService.Instance;
                 _logger.LogInfo("Application OnStartup called");

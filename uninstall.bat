@@ -1,61 +1,80 @@
 @echo off
-echo ========================================
-echo    Task Logger - Uninstallation Script
-echo ========================================
+echo ==========================================
+echo    Task Logger - Uninstallation
+echo ==========================================
 echo.
 
-set INSTALL_DIR=%USERPROFILE%\TaskLogger
-set DESKTOP_DIR=%USERPROFILE%\Desktop
-set STARTMENU_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs
+set INSTALL_DIR=%LOCALAPPDATA%\TaskLogger
 
-echo This will remove Task Logger from your system.
+echo This will completely remove Task Logger from your system.
 echo.
-echo Files to be removed:
-echo   - Installation directory: %INSTALL_DIR%
-echo   - Desktop shortcut: Task Logger
-echo   - Start menu shortcut: Task Logger
+echo Installation directory: %INSTALL_DIR%
 echo.
-echo NOTE: Your task data will be preserved in the database file.
+echo WARNING: This will also remove:
+echo   - All application settings
+echo   - Desktop and Start Menu shortcuts
+echo   - Startup registry entry (if exists)
 echo.
-set /p CONFIRM="Are you sure you want to uninstall? (Y/N): "
-
-if /i not "%CONFIRM%"=="Y" (
-    echo Uninstallation cancelled.
-    pause
-    exit /b
-)
-
+echo Your task database will be preserved in:
+echo   %USERPROFILE%\Documents\TaskLogger\
 echo.
-echo Uninstalling Task Logger...
+echo Are you sure you want to uninstall? (Y/N)
+choice /c YN /n /m "Select [Y/N]: "
+if errorlevel 2 goto cancel
+if errorlevel 1 goto uninstall
 
-REM Remove desktop shortcut
-if exist "%DESKTOP_DIR%\Task Logger.lnk" (
-    echo Removing desktop shortcut...
-    del "%DESKTOP_DIR%\Task Logger.lnk"
-)
+:uninstall
+echo.
+echo Stopping Task Logger if running...
+taskkill /F /IM TaskLogger.exe >nul 2>&1
+timeout /t 2 /nobreak >nul
 
-REM Remove start menu shortcut
-if exist "%STARTMENU_DIR%\Task Logger.lnk" (
-    echo Removing start menu shortcut...
-    del "%STARTMENU_DIR%\Task Logger.lnk"
-)
-
-REM Remove installation directory
+echo Removing installation directory...
 if exist "%INSTALL_DIR%" (
-    echo Removing installation directory...
-    rmdir /S /Q "%INSTALL_DIR%"
+    rmdir /s /q "%INSTALL_DIR%" 2>nul
+    if exist "%INSTALL_DIR%" (
+        echo.
+        echo ERROR: Could not remove installation directory.
+        echo Please close any programs using files in this directory and try again.
+        pause
+        exit /b 1
+    )
 )
 
+echo Removing desktop shortcut...
+if exist "%USERPROFILE%\Desktop\Task Logger.lnk" (
+    del "%USERPROFILE%\Desktop\Task Logger.lnk" 2>nul
+)
+
+echo Removing Start Menu shortcut...
+set START_MENU=%APPDATA%\Microsoft\Windows\Start Menu\Programs
+if exist "%START_MENU%\Task Logger.lnk" (
+    del "%START_MENU%\Task Logger.lnk" 2>nul
+)
+
+echo Removing startup registry entry if exists...
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "TaskLogger" /f >nul 2>&1
+
 echo.
-echo ========================================
+echo ==========================================
 echo    Uninstallation Complete!
-echo ========================================
+echo ==========================================
 echo.
 echo Task Logger has been removed from your system.
 echo.
-echo Your task data is still available at:
-echo   %USERPROFILE%\Documents\TaskLogger\TaskLogger.db
+echo Note: Your task database has been preserved in:
+echo   %USERPROFILE%\Documents\TaskLogger\
 echo.
-echo You can reinstall Task Logger anytime by running the installer again.
+echo If you want to remove the database as well, delete that folder manually.
+goto end
+
+:cancel
 echo.
-pause
+echo Uninstallation cancelled.
+goto end
+
+:end
+echo.
+echo Press any key to exit...
+pause >nul
+exit
