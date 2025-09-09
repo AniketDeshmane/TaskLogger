@@ -25,23 +25,57 @@ namespace TaskLogger.Services
 
         public async Task SaveTaskAsync(string task, string? eventType = null, string? notes = null)
         {
-            var taskEntry = new TaskEntry
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            
+            // Check if there's already an entry for today
+            var existingEntry = await _context.Tasks
+                .Where(t => t.CreatedAt >= today && t.CreatedAt < tomorrow)
+                .OrderByDescending(t => t.CreatedAt)
+                .FirstOrDefaultAsync();
+            
+            if (existingEntry != null && string.IsNullOrEmpty(eventType))
             {
-                Task = task,
-                EventType = eventType,
-                Notes = notes,
-                CreatedAt = DateTime.Now
-            };
-
-            _context.Tasks.Add(taskEntry);
+                // Append to existing entry for today (only for manual entries)
+                existingEntry.Task = existingEntry.Task + "\n" + task;
+                existingEntry.CreatedAt = DateTime.Now; // Update timestamp to latest
+                _context.Tasks.Update(existingEntry);
+            }
+            else
+            {
+                // Create new entry
+                var taskEntry = new TaskEntry
+                {
+                    Task = task,
+                    EventType = eventType,
+                    Notes = notes,
+                    CreatedAt = DateTime.Now
+                };
+                _context.Tasks.Add(taskEntry);
+            }
+            
             await _context.SaveChangesAsync();
         }
 
         public async Task<List<TaskEntry>> GetTasksAsync()
         {
-            return await _context.Tasks
+            var tasks = await _context.Tasks
                 .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
+            
+            // Format multi-line tasks for display
+            foreach (var task in tasks)
+            {
+                if (task.Task.Contains('\n'))
+                {
+                    var lines = task.Task.Split('\n');
+                    task.Task = string.Join("\n• ", lines);
+                    if (!task.Task.StartsWith("• "))
+                        task.Task = "• " + task.Task;
+                }
+            }
+            
+            return tasks;
         }
 
         public async Task<List<TaskEntry>> SearchTasksAsync(string searchText)
@@ -110,18 +144,37 @@ namespace TaskLogger.Services
                 .ToListAsync();
         }
 
+        public async Task<TaskEntry?> GetTodayTaskAsync()
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            
+            return await _context.Tasks
+                .Where(t => t.CreatedAt >= today && t.CreatedAt < tomorrow && string.IsNullOrEmpty(t.EventType))
+                .OrderByDescending(t => t.CreatedAt)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task ExportTasksAsync(string filePath, string format)
         {
             var tasks = await GetTasksAsync();
             var extension = Path.GetExtension(filePath).ToLower();
 
-            if (extension == ".csv")
+            switch (extension)
             {
-                await ExportToCsvAsync(filePath, tasks);
-            }
-            else
-            {
-                await ExportToTextAsync(filePath, tasks);
+                case ".json":
+                    await ExportToJsonAsync(filePath, tasks);
+                    break;
+                case ".csv":
+                    await ExportToCsvAsync(filePath, tasks);
+                    break;
+                case ".xlsx":
+                    await ExportToExcelAsync(filePath, tasks);
+                    break;
+                case ".txt":
+                default:
+                    await ExportToTextAsync(filePath, tasks);
+                    break;
             }
         }
 
@@ -145,15 +198,53 @@ namespace TaskLogger.Services
         private async Task ExportToCsvAsync(string filePath, List<TaskEntry> tasks)
         {
             using var writer = new StreamWriter(filePath);
-            await writer.WriteLineAsync("Id,Timestamp,Task,EventType,Notes");
+            await writer.WriteLineAsync("Id,Date,Time,Task,EventType,Notes");
             
             foreach (var task in tasks)
             {
                 var escapedTask = task.Task.Replace("\"", "\"\"");
                 var escapedNotes = (task.Notes ?? "").Replace("\"", "\"\"");
-                var eventType = task.EventType ?? "";
+                var eventType = task.EventType ?? "Manual";
                 
-                await writer.WriteLineAsync($"\"{task.Id}\",\"{task.Timestamp}\",\"{escapedTask}\",\"{eventType}\",\"{escapedNotes}\"");
+                await writer.WriteLineAsync($"\"{task.Id}\",\"{task.CreatedAt:yyyy-MM-dd}\",\"{task.CreatedAt:HH:mm:ss}\",\"{escapedTask}\",\"{eventType}\",\"{escapedNotes}\"");
+            }
+        }
+
+        private async Task ExportToJsonAsync(string filePath, List<TaskEntry> tasks)
+        {
+            var jsonData = tasks.Select(t => new
+            {
+                t.Id,
+                Date = t.CreatedAt.ToString("yyyy-MM-dd"),
+                Time = t.CreatedAt.ToString("HH:mm:ss"),
+                t.Task,
+                EventType = t.EventType ?? "Manual",
+                Notes = t.Notes ?? ""
+            });
+
+            var json = System.Text.Json.JsonSerializer.Serialize(jsonData, new System.Text.Json.JsonSerializerOptions 
+            { 
+                WriteIndented = true 
+            });
+            
+            await File.WriteAllTextAsync(filePath, json);
+        }
+
+        private async Task ExportToExcelAsync(string filePath, List<TaskEntry> tasks)
+        {
+            // For Excel, we'll create a simple CSV that Excel can open
+            // True Excel format would require additional libraries
+            using var writer = new StreamWriter(filePath);
+            await writer.WriteLineAsync("sep=,"); // Excel hint for CSV separator
+            await writer.WriteLineAsync("Id,Date,Time,Task,Event Type,Notes");
+            
+            foreach (var task in tasks)
+            {
+                var escapedTask = task.Task.Replace("\"", "\"\"");
+                var escapedNotes = (task.Notes ?? "").Replace("\"", "\"\"");
+                var eventType = task.EventType ?? "Manual";
+                
+                await writer.WriteLineAsync($"{task.Id},\"{task.CreatedAt:yyyy-MM-dd}\",\"{task.CreatedAt:HH:mm:ss}\",\"{escapedTask}\",\"{eventType}\",\"{escapedNotes}\"");
             }
         }
 

@@ -79,6 +79,7 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <local:BoolToColorConverter x:Key="BoolToColorConverter"/>
             <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <local:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             
             <!-- Modern Card Style -->
             <Style x:Key="ModernCard" TargetType="Border">

@@ -197,6 +197,35 @@ namespace TaskLogger.Views
             }
         }
 
+        private void TaskTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            // Check if Enter key is pressed (without Shift for multi-line support)
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if ((System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift)
+                {
+                    // Shift+Enter: Add new line
+                    var textBox = sender as System.Windows.Controls.TextBox;
+                    if (textBox != null)
+                    {
+                        int caretIndex = textBox.CaretIndex;
+                        textBox.Text = textBox.Text.Insert(caretIndex, Environment.NewLine);
+                        textBox.CaretIndex = caretIndex + Environment.NewLine.Length;
+                        e.Handled = true;
+                    }
+                }
+                else
+                {
+                    // Enter only: Save the task
+                    if (_viewModel.SaveTaskCommand.CanExecute(null))
+                    {
+                        _viewModel.SaveTaskCommand.Execute(null);
+                    }
+                    e.Handled = true;
+                }
+            }
+        }
+
         private void InitializeSystemTray()
         {
             try

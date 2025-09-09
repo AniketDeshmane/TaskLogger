@@ -65,14 +65,16 @@
                               FontWeight="SemiBold" 
                               Foreground="{StaticResource TextBrush}"
                               Margin="0,0,0,10"/>
-                    <TextBox Style="{StaticResource ModernTextBox}"
+                    <TextBox x:Name="TaskTextBox"
+                            Style="{StaticResource ModernTextBox}"
                             TextWrapping="Wrap"
-                            AcceptsReturn="True"
+                            AcceptsReturn="False"
                             VerticalScrollBarVisibility="Auto"
                             MinHeight="120"
                             MaxHeight="200"
                             FontSize="14"
-                            Text="{Binding TaskText, UpdateSourceTrigger=PropertyChanged}"/>
+                            Text="{Binding TaskText, UpdateSourceTrigger=PropertyChanged}"
+                            KeyDown="TaskTextBox_KeyDown"/>
                 </StackPanel>
                 
                 <!-- Buttons -->

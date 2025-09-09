@@ -15,6 +15,7 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <StartupObject>TaskLogger.App</StartupObject>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationIcon>TaskLogger.ico</ApplicationIcon>
     
     <!-- Package Metadata -->
     <PackageId>TaskLogger</PackageId>
