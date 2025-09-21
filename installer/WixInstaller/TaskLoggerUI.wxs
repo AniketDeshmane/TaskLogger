@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <!-- Custom UI for Task Logger Installation -->
+    <UI Id="WixUI_TaskLogger">
+      <!-- Property for tracking UI state -->
+      <Property Id="WixUI_Mode" Value="InstallDir" />
+      
+      <!-- Default properties -->
+      <Property Id="LAUNCHAPP" Value="1" />
+      <Property Id="AUTOSTART" Value="0" />
+      
+      <!-- Text Styles -->
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Segoe UI" Size="9" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Segoe UI" Size="12" Bold="yes" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Segoe UI" Size="14" Bold="yes" />
+      
+      <!-- Property for installation folder -->
+      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+      
+      <!-- Dialog References -->
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      
+      <!-- Custom Dialogs -->
+      
+      <!-- Welcome Dialog -->
+      <Dialog Id="WelcomeDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="&amp;Back" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="135" Y="80" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+          <Text>Welcome to the [ProductName] Setup Wizard. This wizard will guide you through the installation process.</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}Welcome to Task Logger</Text>
+        </Control>
+      </Dialog>
+      
+      <!-- License Agreement Dialog -->
+      <Dialog Id="LicenseAgreementDlg" Width="370" Height="270" Title="[ProductName] License Agreement">
+        <Control Id="LicenseText" Type="ScrollableText" X="20" Y="60" Width="330" Height="120" Sunken="yes" TabSkip="no">
+          <Text SourceFile="License.rtf" />
+        </Control>
+        <Control Id="Print" Type="PushButton" X="112" Y="243" Width="56" Height="17" Text="&amp;Print">
+          <Publish Event="DoAction" Value="WixUIPrintEula">1</Publish>
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="WelcomeDlg">1</Publish>
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="InstallLocationDlg">LicenseAccepted = "1"</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="LicenseAcceptedCheckBox" Type="CheckBox" X="20" Y="207" Width="330" Height="18" CheckBoxValue="1" Property="LicenseAccepted">
+          <Text>I &amp;accept the terms in the License Agreement</Text>
+        </Control>
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>Please read the following license agreement carefully</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}End-User License Agreement</Text>
+        </Control>
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+      </Dialog>
+      
+      <!-- Installation Location Dialog -->
+      <Dialog Id="InstallLocationDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="DatabaseLocationDlg">1</Publish>
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>Choose the installation location for Task Logger</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}Installation Folder</Text>
+        </Control>
+        <Control Id="FolderLabel" Type="Text" X="20" Y="60" Width="290" Height="10" NoPrefix="yes">
+          <Text>&amp;Install Task Logger to:</Text>
+        </Control>
+        <Control Id="Folder" Type="PathEdit" X="20" Y="75" Width="265" Height="18" Property="WIXUI_INSTALLDIR" Indirect="yes" />
+        <Control Id="ChangeFolder" Type="PushButton" X="290" Y="75" Width="65" Height="18" Text="&amp;Browse...">
+          <Publish Event="SpawnDialog" Value="BrowseDlg">1</Publish>
+        </Control>
+        <Control Id="DiskUsage" Type="Text" X="20" Y="110" Width="290" Height="30" NoPrefix="yes">
+          <Text>Installation requires approximately 150 MB of disk space.</Text>
+        </Control>
+      </Dialog>
+      
+      <!-- Database Location Dialog -->
+      <Dialog Id="DatabaseLocationDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="CustomizeDlg">1</Publish>
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="InstallLocationDlg">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>Choose where to store your task database</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}Database Location</Text>
+        </Control>
+        <Control Id="FolderLabel" Type="Text" X="20" Y="60" Width="290" Height="20" NoPrefix="yes">
+          <Text>&amp;Store task database in:</Text>
+        </Control>
+        <Control Id="Folder" Type="PathEdit" X="20" Y="85" Width="265" Height="18" Property="DATABASEFOLDER" />
+        <Control Id="ChangeFolder" Type="PushButton" X="290" Y="85" Width="65" Height="18" Text="&amp;Browse...">
+          <Publish Event="SpawnDialog" Value="BrowseDlg">1</Publish>
+        </Control>
+        <Control Id="InfoText" Type="Text" X="20" Y="120" Width="330" Height="40" NoPrefix="yes">
+          <Text>The database file will store all your tasks and settings. Choose a location that is regularly backed up. Default location is your Documents folder.</Text>
+        </Control>
+      </Dialog>
+      
+      <!-- Customize Dialog -->
+      <Dialog Id="CustomizeDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="DatabaseLocationDlg">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>Select additional options for Task Logger</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}Custom Setup</Text>
+        </Control>
+        
+        <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="80" Width="330" Height="18" CheckBoxValue="1" Property="INSTALLDESKTOPSHORTCUT">
+          <Text>Create a &amp;desktop shortcut</Text>
+        </Control>
+        
+        <Control Id="AutoStartCheckBox" Type="CheckBox" X="20" Y="110" Width="330" Height="18" CheckBoxValue="1" Property="AUTOSTART">
+          <Text>&amp;Start Task Logger when Windows starts</Text>
+        </Control>
+        
+        <Control Id="LaunchCheckBox" Type="CheckBox" X="20" Y="140" Width="330" Height="18" CheckBoxValue="1" Property="LAUNCHAPP">
+          <Text>&amp;Launch Task Logger when installation completes</Text>
+        </Control>
+        
+        <Control Id="InfoText" Type="Text" X="20" Y="180" Width="330" Height="40" NoPrefix="yes">
+          <Text>You can change these settings later from within the application's Settings menu.</Text>
+        </Control>
+      </Dialog>
+      
+      <!-- Verify Ready Dialog -->
+      <Dialog Id="VerifyReadyDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Install" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Install">
+          <Publish Event="EndDialog" Value="Return">1</Publish>
+        </Control>
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="CustomizeDlg">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>Ready to install Task Logger</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}Ready to Install</Text>
+        </Control>
+        <Control Id="InfoText" Type="Text" X="20" Y="60" Width="330" Height="120" NoPrefix="yes">
+          <Text>The Setup Wizard is ready to begin installation.
+
+Installation folder:
+[INSTALLFOLDER]
+
+Database location:
+[DATABASEFOLDER]
+
+Click Install to begin the installation.
+Click Back to review or change any of your installation settings.
+Click Cancel to exit the wizard.</Text>
+        </Control>
+      </Dialog>
+      
+      <!-- Exit Dialog -->
+      <Dialog Id="ExitDialog" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Finish" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="&amp;Finish">
+          <Publish Event="EndDialog" Value="Return">1</Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Disabled="yes" Text="Cancel" />
+        <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="&amp;Back" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Description" Type="Text" X="135" Y="100" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+          <Text>Task Logger has been successfully installed. Click Finish to exit the Setup Wizard.</Text>
+        </Control>
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+          <Text>{\WixUI_Font_Title}Installation Complete</Text>
+        </Control>
+      </Dialog>
+      
+      <!-- Cancel Dialog -->
+      <Dialog Id="CancelDlg" Width="260" Height="85" Title="[ProductName] Setup" NoMinimize="yes">
+        <Control Id="No" Type="PushButton" X="132" Y="57" Width="56" Height="17" Default="yes" Cancel="yes" Text="&amp;No">
+          <Publish Event="EndDialog" Value="Return">1</Publish>
+        </Control>
+        <Control Id="Yes" Type="PushButton" X="72" Y="57" Width="56" Height="17" Text="&amp;Yes">
+          <Publish Event="EndDialog" Value="Exit">1</Publish>
+        </Control>
+        <Control Id="Text" Type="Text" X="48" Y="15" Width="194" Height="30" TabSkip="no">
+          <Text>Are you sure you want to cancel [ProductName] installation?</Text>
+        </Control>
+        <Control Id="Icon" Type="Icon" X="15" Y="15" Width="24" Height="24" TabSkip="no" FixedSize="yes" IconSize="32" SourceFile="WixUI_Ico_Exclam.ico" />
+      </Dialog>
+      
+      <!-- Installation Sequence -->
+      <InstallUISequence>
+        <Show Dialog="WelcomeDlg" Before="ProgressDlg">NOT Installed</Show>
+        <Show Dialog="ExitDialog" OnExit="success">NOT Installed</Show>
+      </InstallUISequence>
+    </UI>
+  </Fragment>
+</Wix>
