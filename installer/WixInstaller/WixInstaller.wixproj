@@ -1,0 +1,21 @@
+<Project Sdk="WixToolset.Sdk/4.0.5">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <ProductName>Task Logger</ProductName>
+    <ProductVersion>1.0.0</ProductVersion>
+    <ProductManufacturer>Your Company</ProductManufacturer>
+    <ProductId>*</ProductId>
+    <UpgradeCode>{12345678-1234-1234-1234-123456789012}</UpgradeCode>
+    <OutputName>TaskLoggerSetup</OutputName>
+    <DefineConstants>ProductVersion=$(ProductVersion)</DefineConstants>
+    <!-- Disable automatic package restore to avoid conflicts -->
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Product.wxs" />
+  </ItemGroup>
+</Project>
