@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="Task Logger" 
+           Version="1.0.0.0" 
+           Manufacturer="Your Company" 
+           UpgradeCode="12345678-1234-1234-1234-123456789012"
+           InstallerVersion="500"
+           Compressed="true">
+    
+    <!-- Define installation scope -->
+    <Property Id="INSTALLFOLDER" Value="[ProgramFiles64Folder]TaskLogger" />
+    
+    <!-- Major upgrade handling -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+    <!-- Media for installation files -->
+    <Media Id="1" Cabinet="TaskLogger.cab" EmbedCab="true" />
+    
+    <!-- Installation directory structure -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="TaskLogger">
+        
+        <!-- Main application component -->
+        <Component Id="MainExecutable" Guid="{87654321-4321-4321-4321-210987654321}">
+          <File Id="TaskLogger.exe" Source="..\..\bin\Release\net8.0-windows\win-x64\publish\TaskLogger.exe" KeyPath="true">
+            <Shortcut Id="StartMenuShortcut" 
+                      Directory="ProgramMenuFolder" 
+                      Name="Task Logger" 
+                      Description="Task Logger Application"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon="TaskLogger.exe"
+                      IconIndex="0" 
+                      Advertise="false" />
+          </File>
+        </Component>
+        
+        <!-- Application dependencies -->
+        <Component Id="Dependencies" Guid="{11111111-2222-3333-4444-555555555555}">
+          <File Id="TaskLogger.dll" Source="..\..\bin\Release\net8.0-windows\win-x64\publish\TaskLogger.dll" />
+          <File Id="TaskLogger.deps.json" Source="..\..\bin\Release\net8.0-windows\win-x64\publish\TaskLogger.deps.json" />
+          <File Id="TaskLogger.runtimeconfig.json" Source="..\..\bin\Release\net8.0-windows\win-x64\publish\TaskLogger.runtimeconfig.json" />
+        </Component>
+        
+        <!-- Add all other DLL files from publish folder -->
+        <!-- This would typically be generated dynamically using heat.exe or similar -->
+        
+      </Directory>
+    </StandardDirectory>
+    
+    <!-- Start Menu folder -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="Task Logger" />
+    </StandardDirectory>
+    
+    <!-- Desktop shortcut (optional) -->
+    <StandardDirectory Id="DesktopFolder" />
+    
+    <!-- Feature definition -->
+    <Feature Id="MainApplication" Title="Task Logger" Level="1">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="Dependencies" />
+    </Feature>
+    
+    <!-- Icon for shortcuts -->
+    <Icon Id="TaskLogger.exe" SourceFile="..\..\TaskLogger.ico" />
+    
+    <!-- UI Configuration (optional - for GUI installer) -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <ui:WixUI Id="WixUI_InstallDir" />
+    <ui:WixUI Id="WixUI_ErrorProgressText" />
+    
+    <!-- License agreement (optional) -->
+    <!-- <WixVariable Id="WixUILicenseRtf" Value="License.rtf" /> -->
+    
+  </Package>
+</Wix>
