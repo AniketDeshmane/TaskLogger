@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" 
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   
   <!-- Product Information -->
   <Package Name="Task Logger" 
            Manufacturer="TaskLogger Team"
            Version="1.0.0.0"
            UpgradeCode="12345678-1234-1234-1234-123456789012"
-           Scope="perMachine">
+           Scope="perMachine"
+           InstallerVersion="500"
+           Compressed="yes">
     
     <!-- Package Details -->
     <SummaryInformation 
@@ -19,24 +20,8 @@
     <Media Id="1" Cabinet="TaskLogger.cab" EmbedCab="yes" />
     
     <!-- Icon for Add/Remove Programs -->
-    <Icon Id="TaskLogger.ico" SourceFile="..\..\src\TaskLogger\TaskLogger.ico" />
-    <Property Id="ARPPRODUCTICON" Value="TaskLogger.ico" />
-    
-    <!-- Properties for UI -->
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
-    <Property Id="DATABASEFOLDER" Secure="yes" />
-    
-    <!-- Default database location -->
-    <Property Id="DEFAULTDBPATH" Value="[PersonalFolder]TaskLogger" />
-    
-    <!-- UI Reference -->
-    <UIRef Id="WixUI_TaskLogger" />
-    <UIRef Id="WixUI_ErrorProgressText" />
-    
-    <!-- License file -->
-    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
-    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
-    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp" />
+    <Icon Id="TaskLoggerIcon" SourceFile="..\..\src\TaskLogger\TaskLogger.ico" />
+    <Property Id="ARPPRODUCTICON" Value="TaskLoggerIcon" />
     
     <!-- Major Upgrade handling -->
     <MajorUpgrade 
@@ -49,16 +34,7 @@
         
         <!-- Main Application Files -->
         <Component Id="MainExecutable" Guid="87654321-4321-4321-4321-210987654321">
-          <File Id="TaskLogger.exe" Source="..\..\build\output\publish\TaskLogger.exe" KeyPath="yes">
-            <Shortcut Id="StartMenuShortcut"
-                      Directory="ProgramMenuFolder"
-                      Name="Task Logger"
-                      Description="Task Logger - Track your daily tasks"
-                      WorkingDirectory="INSTALLFOLDER"
-                      Icon="TaskLogger.ico"
-                      IconIndex="0"
-                      Advertise="yes" />
-          </File>
+          <File Id="TaskLoggerExe" Source="..\..\build\output\publish\TaskLogger.exe" KeyPath="yes" />
           
           <!-- Registry entries for app paths -->
           <RegistryValue Root="HKLM"
@@ -66,94 +42,22 @@
                          Name="InstallPath"
                          Type="string"
                          Value="[INSTALLFOLDER]" />
-          
-          <RegistryValue Root="HKLM"
-                         Key="SOFTWARE\TaskLogger"
-                         Name="DatabasePath"
-                         Type="string"
-                         Value="[DATABASEFOLDER]" />
         </Component>
         
-        <!-- DLL and dependencies -->
-        <Component Id="Dependencies" Guid="11111111-2222-3333-4444-555566667777">
-          <File Id="TaskLogger.dll" Source="..\..\build\output\publish\TaskLogger.dll" />
-          <File Id="TaskLogger.deps.json" Source="..\..\build\output\publish\TaskLogger.deps.json" />
-          <File Id="TaskLogger.runtimeconfig.json" Source="..\..\build\output\publish\TaskLogger.runtimeconfig.json" />
-        </Component>
-        
-        <!-- Desktop Shortcut Component -->
-        <Component Id="DesktopShortcut" Guid="99999999-8888-7777-6666-555544443333">
-          <Shortcut Id="DesktopShortcut"
-                    Directory="DesktopFolder"
-                    Name="Task Logger"
-                    Description="Task Logger - Track your daily tasks"
-                    Target="[INSTALLFOLDER]TaskLogger.exe"
-                    WorkingDirectory="INSTALLFOLDER"
-                    Icon="TaskLogger.ico"
-                    IconIndex="0" />
-          <RegistryValue Root="HKCU"
-                         Key="Software\TaskLogger"
-                         Name="DesktopShortcut"
-                         Type="integer"
-                         Value="1"
-                         KeyPath="yes" />
-        </Component>
-        
-        <!-- Auto-start Component (optional) -->
-        <Component Id="AutoStart" Guid="AAAAAAAA-BBBB-CCCC-DDDD-EEEEFFFFFFFF">
-          <RegistryValue Root="HKCU"
-                         Key="Software\Microsoft\Windows\CurrentVersion\Run"
-                         Name="TaskLogger"
-                         Type="string"
-                         Value="&quot;[INSTALLFOLDER]TaskLogger.exe&quot; --minimized" />
-          <Condition>AUTOSTART = 1</Condition>
+        <!-- PDB file for debugging (optional) -->
+        <Component Id="DebugSymbols" Guid="11111111-2222-3333-4444-555566667777">
+          <File Id="TaskLoggerPdb" Source="..\..\build\output\publish\TaskLogger.pdb" />
         </Component>
       </Directory>
-    </StandardDirectory>
-    
-    <!-- Start Menu Directory -->
-    <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="ApplicationProgramsFolder" Name="Task Logger" />
-    </StandardDirectory>
-    
-    <!-- Desktop Directory -->
-    <StandardDirectory Id="DesktopFolder" />
-    
-    <!-- Database Directory -->
-    <StandardDirectory Id="PersonalFolder">
-      <Directory Id="DATABASEFOLDER" Name="TaskLogger" />
     </StandardDirectory>
     
     <!-- Feature Tree -->
     <Feature Id="ProductFeature" Title="Task Logger" Level="1" 
              Description="The complete Task Logger application"
-             Display="expand" AllowAdvertise="no" Absent="disallow">
+             Display="expand" AllowAdvertise="no">
       <ComponentRef Id="MainExecutable" />
-      <ComponentRef Id="Dependencies" />
-      
-      <Feature Id="DesktopShortcutFeature" Title="Desktop Shortcut" Level="1"
-               Description="Create a desktop shortcut for Task Logger">
-        <ComponentRef Id="DesktopShortcut" />
-      </Feature>
-      
-      <Feature Id="AutoStartFeature" Title="Start with Windows" Level="2"
-               Description="Automatically start Task Logger when Windows starts">
-        <ComponentRef Id="AutoStart" />
-      </Feature>
+      <ComponentRef Id="DebugSymbols" />
     </Feature>
-    
-    <!-- Custom Actions -->
-    <CustomAction Id="LaunchApplication" 
-                  FileRef="TaskLogger.exe"
-                  ExeCommand=""
-                  Execute="immediate"
-                  Impersonate="yes"
-                  Return="asyncNoWait" />
-    
-    <!-- Installation Sequences -->
-    <InstallExecuteSequence>
-      <Custom Action="LaunchApplication" After="InstallFinalize">NOT Installed AND LAUNCHAPP = 1</Custom>
-    </InstallExecuteSequence>
     
   </Package>
 </Wix>

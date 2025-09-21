@@ -13,11 +13,12 @@
     <WarningLevel>3</WarningLevel>
     <Cultures>en-US</Cultures>
     <DefineConstants>Debug</DefineConstants>
+    <!-- Disable auto-include of .wxs files -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Product.wxs" />
-    <Compile Include="TaskLoggerUI.wxs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,8 +27,4 @@
     <Content Include="dialog.bmp" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="WixToolset.Sdk" Version="4.0.5" />
-    <PackageReference Include="WixToolset.UI.wixext" Version="4.0.5" />
-  </ItemGroup>
 </Project>
