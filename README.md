@@ -79,6 +79,7 @@ build.bat
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) (optional)
 - Windows 10/11 SDK
+- [WiX Toolset](https://wixtoolset.org/) (for MSI installer)
 
 ### Build Instructions
 
@@ -115,6 +116,31 @@ dotnet publish -c Release -r win-x64 --self-contained
 cd ../../installer/WixInstaller
 dotnet build -c Release
 ```
+
+## 🚀 Automated Releases
+
+This project uses GitHub Actions for automated building and releasing.
+
+### Release Workflow (`release.yml`)
+Creates releases when you push a version tag or manually trigger it:
+
+```bash
+# Create a new release
+git tag v1.0.0
+git push origin v1.0.0
+
+# Or manually trigger from GitHub Actions tab
+```
+
+**Release Assets:**
+- `TaskLogger-{version}-Installer.zip` - Full installer with batch scripts
+- `TaskLogger-{version}-Portable.zip` - Portable executable
+
+**Features:**
+- Uses your proven `build.bat` script
+- Creates professional release packages
+- Generates detailed release notes
+- Automatically creates GitHub releases with download links
 
 ## 📖 User Guide
 

@@ -27,6 +27,14 @@ set OUTPUT_DIR=%BUILD_DIR%\output
 set INSTALLER_OUTPUT=%BUILD_DIR%\installer
 set LOG_FILE=%BUILD_DIR%\build.log
 
+:: Check if running in GitHub Actions
+if defined GITHUB_ACTIONS (
+    set GITHUB_CI=1
+    echo Running in GitHub Actions environment
+) else (
+    set GITHUB_CI=0
+)
+
 :: Parse command line arguments
 set BUILD_TYPE=Release
 set CLEAN_BUILD=1
@@ -383,15 +391,19 @@ echo.
 echo Build completed at %date% %time% >> "%LOG_FILE%"
 echo.
 
-:: Ask if user wants to run the installer
-if exist "%OUTPUT_DIR%\TaskLoggerSetup.msi" (
-    choice /C YN /N /M "Would you like to run the installer now? [Y/N]: "
-    if errorlevel 2 goto :end
-    if errorlevel 1 (
-        echo.
-        echo Starting installer...
-        start "" "%OUTPUT_DIR%\TaskLoggerSetup.msi"
+:: Ask if user wants to run the installer (skip in CI)
+if %GITHUB_CI%==0 (
+    if exist "%OUTPUT_DIR%\TaskLoggerSetup.msi" (
+        choice /C YN /N /M "Would you like to run the installer now? [Y/N]: "
+        if errorlevel 2 goto :end
+        if errorlevel 1 (
+            echo.
+            echo Starting installer...
+            start "" "%OUTPUT_DIR%\TaskLoggerSetup.msi"
+        )
     )
+) else (
+    echo Skipping installer prompt in CI environment
 )
 goto :end
 
@@ -441,5 +453,7 @@ goto :end
 :end
 endlocal
 echo.
-pause
+if %GITHUB_CI%==0 (
+    pause
+)
 exit /b 0
