@@ -330,3 +330,58 @@ FodyWeavers.xsd
 # Task Logger specific
 task_log.txt
 *.log
+
+# Build output directories
+build/
+bin/
+obj/
+
+# Installer output
+installer-package/
+*.msi
+*.wixpdb
+*.wixobj
+
+# Release packages
+*.zip
+TaskLogger-*-Installer.zip
+TaskLogger-*-Portable.zip
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Application data
+%LOCALAPPDATA%/TaskLogger/
+%USERPROFILE%/Documents/TaskLogger/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# IDE specific
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# WiX Toolset
+*.wixobj
+*.wixpdb
+*.wxl
+
+# Tools directory (if you want to exclude the dotnet tools)
+# tools/
+
+# GitHub Actions artifacts
+.github/workflows/artifacts/

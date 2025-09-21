@@ -1,0 +1,30 @@
+<Project Sdk="WixToolset.Sdk/4.0.5">
+  <PropertyGroup>
+    <OutputName>TaskLoggerSetup</OutputName>
+    <OutputType>Package</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>..\..\build\installer\</OutputPath>
+    <IntermediateOutputPath>obj\</IntermediateOutputPath>
+    <SuppressIces>ICE61;ICE03;ICE82;ICE80</SuppressIces>
+    <SuppressValidation>false</SuppressValidation>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>3</WarningLevel>
+    <Cultures>en-US</Cultures>
+    <DefineConstants>Debug</DefineConstants>
+    <!-- Disable auto-include of .wxs files -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="License.rtf" />
+    <Content Include="banner.bmp" />
+    <Content Include="dialog.bmp" />
+  </ItemGroup>
+
+</Project>

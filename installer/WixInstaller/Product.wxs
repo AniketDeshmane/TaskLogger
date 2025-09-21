@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  
+  <!-- Product Information -->
+  <Package Name="Task Logger" 
+           Manufacturer="TaskLogger Team"
+           Version="1.0.0.0"
+           UpgradeCode="12345678-1234-1234-1234-123456789012"
+           Scope="perMachine"
+           InstallerVersion="500"
+           Compressed="yes">
+    
+    <!-- Package Details -->
+    <SummaryInformation 
+      Description="Task Logger - Professional Task Management Application"
+      Manufacturer="TaskLogger Team"
+      Keywords="Task,Logger,Productivity,Windows" />
+    
+    <!-- Media for installation files -->
+    <Media Id="1" Cabinet="TaskLogger.cab" EmbedCab="yes" />
+    
+    <!-- Icon for Add/Remove Programs -->
+    <Icon Id="TaskLoggerIcon" SourceFile="..\..\src\TaskLogger\TaskLogger.ico" />
+    <Property Id="ARPPRODUCTICON" Value="TaskLoggerIcon" />
+    
+    <!-- Major Upgrade handling -->
+    <MajorUpgrade 
+      DowngradeErrorMessage="A newer version of [ProductName] is already installed."
+      AllowSameVersionUpgrades="yes" />
+    
+    <!-- Installation Directory Structure -->
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Task Logger">
+        
+        <!-- Main Application Files -->
+        <Component Id="MainExecutable" Guid="87654321-4321-4321-4321-210987654321">
+          <File Id="TaskLoggerExe" Source="..\..\build\output\publish\TaskLogger.exe" KeyPath="yes" />
+          
+          <!-- Registry entries for app paths -->
+          <RegistryValue Root="HKLM"
+                         Key="SOFTWARE\TaskLogger"
+                         Name="InstallPath"
+                         Type="string"
+                         Value="[INSTALLFOLDER]" />
+        </Component>
+        
+        <!-- PDB file for debugging (optional) -->
+        <Component Id="DebugSymbols" Guid="11111111-2222-3333-4444-555566667777">
+          <File Id="TaskLoggerPdb" Source="..\..\build\output\publish\TaskLogger.pdb" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+    
+    <!-- Feature Tree -->
+    <Feature Id="ProductFeature" Title="Task Logger" Level="1" 
+             Description="The complete Task Logger application"
+             Display="expand" AllowAdvertise="no">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="DebugSymbols" />
+    </Feature>
+    
+  </Package>
+</Wix>
