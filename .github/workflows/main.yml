@@ -35,9 +35,7 @@ jobs:
       
     - name: Build and Package using build.bat
       shell: cmd
-      run: |
-        echo Building Task Logger...
-        build.bat --project-only
+      run: call "%GITHUB_WORKSPACE%\build.bat" --project-only
         
     - name: Create Release Packages
       shell: pwsh
