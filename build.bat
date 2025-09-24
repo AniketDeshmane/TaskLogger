@@ -174,7 +174,7 @@ if %CLEAN_BUILD%==1 (
     echo Clean completed.
     echo.
 ) else (
-    echo [2/7] Skipping Clean (--no-clean specified)
+    echo [2/7] Skipping Clean (--no-clean specified^)
     echo.
 )
 
@@ -200,7 +200,7 @@ if %BUILD_PROJECT%==1 (
     echo Package restore completed successfully.
     echo.
 ) else (
-    echo [3/7] Skipping Package Restore (--installer-only specified)
+    echo [3/7] Skipping Package Restore (--installer-only specified^)
     echo.
 )
 
@@ -240,7 +240,7 @@ if %BUILD_PROJECT%==1 (
     echo Application build completed successfully.
     echo.
 ) else (
-    echo [4/7] Skipping Application Build (--installer-only specified)
+    echo [4/7] Skipping Application Build (--installer-only specified^)
     echo.
 )
 
@@ -275,7 +275,7 @@ if %BUILD_INSTALLER%==1 (
     echo Installer resources created.
     echo.
 ) else (
-    echo [5/7] Skipping Installer Resources (--project-only specified)
+    echo [5/7] Skipping Installer Resources (--project-only specified^)
     echo.
 )
 
@@ -319,7 +319,7 @@ if %BUILD_INSTALLER%==1 (
     )
     echo.
 ) else (
-    echo [6/7] Skipping Installer Build (--project-only specified)
+    echo [6/7] Skipping Installer Build (--project-only specified^)
     echo.
 )
 
@@ -353,7 +353,7 @@ if %CREATE_PACKAGE%==1 (
     echo Distribution packages created.
     echo.
 ) else (
-    echo [7/7] Skipping Package Creation
+    echo [7/7] Skipping Package Creation^
     echo.
 )
 
