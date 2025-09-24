@@ -391,26 +391,26 @@ echo.
 echo Build completed at %date% %time% >> "%LOG_FILE%"
 echo.
 
-:: Ask if user wants to run the installer (skip in CI)
-if %GITHUB_CI%==0 (
-    if exist "%OUTPUT_DIR%\TaskLoggerSetup.msi" (
-        choice /C YN /N /M "Would you like to run the installer now? [Y/N]: "
-        if errorlevel 2 goto :end
-        if errorlevel 1 (
-            echo.
-            echo Starting installer...
-            start "" "%OUTPUT_DIR%\TaskLoggerSetup.msi"
-        )
-    )
-) else (
-    echo Skipping installer prompt in CI environment
-)
-goto :end
+::: Ask if user wants to run the installer (skip in CI)
+if "%GITHUB_CI%"=="0" goto maybe_install
+echo Skipping installer prompt in CI environment
+goto end
 
-:: ============================================================================
-:: Error Handler
-:: ============================================================================
-:error
+:maybe_install
+if not exist "%OUTPUT_DIR%\TaskLoggerSetup.msi" goto end
+choice /C YN /N /M "Would you like to run the installer now? [Y/N]: "
+if errorlevel 2 goto end
+if errorlevel 1 (
+    echo.
+    echo Starting installer...
+    start "" "%OUTPUT_DIR%\TaskLoggerSetup.msi"
+)
+
+::: ============================================================================
+::: Error Handler
+::: ============================================================================
+:::
+::error
 cd /d "%PROJECT_DIR%"
 echo.
 echo ============================================================================
@@ -422,10 +422,11 @@ echo.
 echo Build failed at %date% %time% >> "%LOG_FILE%"
 exit /b 1
 
-:: ============================================================================
-:: Show Help
-:: ============================================================================
-:show_help
+::: ============================================================================
+::: Show Help
+::: ============================================================================
+:::
+::show_help
 echo.
 echo Task Logger Build Script
 echo ========================
@@ -447,13 +448,14 @@ echo   build.bat --installer-only   Build installer only
 echo.
 goto :end
 
-:: ============================================================================
-:: End
-:: ============================================================================
+::: ============================================================================
+::: End
+::: ============================================================================
+:::
 :end
 endlocal
 echo.
-if %GITHUB_CI%==0 (
-    pause
-)
+if not "%GITHUB_CI%"=="0" goto exit_now
+pause
+:exit_now
 exit /b 0
