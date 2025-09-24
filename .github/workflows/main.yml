@@ -1,0 +1,134 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Install WiX Toolset
+      run: dotnet tool install --global wix --version 4.0.5
+      
+    - name: Build and Package using build.bat
+      shell: cmd
+      run: |
+        echo Building Task Logger...
+        build.bat --project-only
+        
+    - name: Create Release Packages
+      shell: pwsh
+      run: |
+        Write-Host "Creating release packages..."
+        
+        # Get version from tag or input
+        if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+          $version = "${{ github.event.inputs.version }}"
+        } else {
+          $version = "${{ github.ref_name }}"
+        }
+        
+        $versionClean = $version.TrimStart('v')
+        
+        # Create output directory
+        New-Item -ItemType Directory -Path "./release" -Force | Out-Null
+        
+        # Copy the built executable
+        if (Test-Path "./build/output/publish/TaskLogger.exe") {
+          Copy-Item -Path "./build/output/publish/TaskLogger.exe" -Destination "./release/TaskLogger.exe"
+          Copy-Item -Path "./build/output/publish/TaskLogger.pdb" -Destination "./release/TaskLogger.pdb" -ErrorAction SilentlyContinue
+          
+          # Copy any other necessary files
+          Get-ChildItem -Path "./build/output/publish/" -File | ForEach-Object {
+            if ($_.Name -ne "TaskLogger.exe" -and $_.Name -ne "TaskLogger.pdb") {
+              Copy-Item -Path $_.FullName -Destination "./release/"
+            }
+          }
+          
+          Write-Host "Application files copied to release directory"
+        } else {
+          Write-Error "TaskLogger.exe not found in build output!"
+          exit 1
+        }
+        
+        # Create portable package
+        Write-Host "Creating portable package..."
+        Compress-Archive -Path "./release/*" -DestinationPath "./TaskLogger-$versionClean-Portable.zip" -Force
+        
+        # Create installer package with batch installer
+        Write-Host "Creating installer package..."
+        New-Item -ItemType Directory -Path "./installer-package" -Force | Out-Null
+        
+        # Copy application files
+        Copy-Item -Path "./release/*" -Destination "./installer-package/" -Recurse -Force
+        
+        # Create installer batch file
+        $installerContent = "@echo off`necho ==========================================`necho    Task Logger Installation`necho ==========================================`necho.`nset INSTALL_DIR=%LOCALAPPDATA%\TaskLogger`necho Installing to: %INSTALL_DIR%`necho.`nif exist `"%INSTALL_DIR%`" (`necho     echo Removing previous installation...`necho     rmdir /s /q `"%INSTALL_DIR%`"`necho )`necho echo Creating installation directory...`necho mkdir `"%INSTALL_DIR%`"`necho echo Copying application files...`necho xcopy /E /I /Y `"%~dp0*`" `"%INSTALL_DIR%\`" >nul`necho echo Creating desktop shortcut...`necho powershell -Command `"$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Task Logger.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\TaskLogger.exe'; $Shortcut.WorkingDirectory = '%INSTALL_DIR%'; $Shortcut.IconLocation = '%INSTALL_DIR%\TaskLogger.exe'; $Shortcut.Save()`"`necho echo.`necho echo ==========================================`necho echo    Installation Complete!`necho echo ==========================================`necho echo.`necho echo Task Logger has been installed successfully.`necho echo A desktop shortcut has been created.`necho echo.`necho echo Would you like to start Task Logger now? (Y/N)`necho choice /c YN /n /m `"Select [Y/N]: `"`necho if errorlevel 2 goto end`necho if errorlevel 1 start `"`" `"%INSTALL_DIR%\TaskLogger.exe`"`necho :end`necho echo.`necho pause"
+        
+        $installerContent | Out-File -FilePath "./installer-package/install.bat" -Encoding ASCII
+        
+        # Create uninstaller batch file
+        $uninstallerContent = "@echo off`necho ==========================================`necho    Task Logger - Uninstallation`necho ==========================================`necho.`nset INSTALL_DIR=%LOCALAPPDATA%\TaskLogger`necho echo This will uninstall Task Logger from your system.`necho echo Installation directory: %INSTALL_DIR%`necho echo.`necho echo Are you sure you want to uninstall? (Y/N)`necho choice /c YN /n /m `"Select [Y/N]: `"`necho if errorlevel 2 goto cancel`necho if errorlevel 1 goto uninstall`necho :uninstall`necho echo.`necho echo Stopping Task Logger if running...`necho taskkill /F /IM TaskLogger.exe >nul 2>&1`necho echo Removing installation directory...`necho if exist `"%INSTALL_DIR%`" rmdir /s /q `"%INSTALL_DIR%`"`necho echo Removing desktop shortcut...`necho if exist `"%USERPROFILE%\Desktop\Task Logger.lnk`" del `"%USERPROFILE%\Desktop\Task Logger.lnk`"`necho echo.`necho echo ==========================================`necho echo    Uninstallation Complete!`necho echo ==========================================`necho echo.`necho echo Task Logger has been removed from your system.`necho goto end`necho :cancel`necho echo.`necho echo Uninstallation cancelled.`necho goto end`necho :end`necho echo.`necho pause"
+        
+        $uninstallerContent | Out-File -FilePath "./installer-package/uninstall.bat" -Encoding ASCII
+        
+        # Create installer package
+        Compress-Archive -Path "./installer-package/*" -DestinationPath "./TaskLogger-$versionClean-Installer.zip" -Force
+        
+        Write-Host "Packages created successfully!"
+        Get-ChildItem *.zip | ForEach-Object { Write-Host "  - $($_.Name) ($([math]::Round($_.Length / 1MB, 2)) MB)" }
+        
+    - name: Generate Release Notes
+      id: release_notes
+      shell: pwsh
+      run: |
+        if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+          $version = "${{ github.event.inputs.version }}"
+        } else {
+          $version = "${{ github.ref_name }}"
+        }
+        
+        $versionClean = $version.TrimStart('v')
+        $date = Get-Date -Format "yyyy-MM-dd"
+        
+        $notes = "## Task Logger $versionClean`n`nReleased: $date`n`n### Installation Options`n`n1. **TaskLogger-$versionClean-Installer.zip** - Recommended for most users`n   - Contains self-contained version with installer`n   - No .NET runtime required`n   - Includes install and uninstall scripts`n   - Creates desktop shortcut`n`n2. **TaskLogger-$versionClean-Portable.zip** - Portable version`n   - No installation required`n   - No .NET runtime required`n   - Extract and run TaskLogger.exe directly`n`n### System Requirements`n`n- Windows 10/11 (64-bit)`n- No additional dependencies required (self-contained)`n`n### Installation Instructions`n`n**For Installer Package:**`n1. Download TaskLogger-$versionClean-Installer.zip`n2. Extract the zip file`n3. Run install.bat as administrator`n4. Follow the installation prompts`n`n**For Portable Package:**`n1. Download TaskLogger-$versionClean-Portable.zip`n2. Extract to your desired location`n3. Run TaskLogger.exe directly`n`n### Uninstallation`n`nRun uninstall.bat from the installation directory."
+        
+        echo "RELEASE_NOTES<<EOF" >> $env:GITHUB_OUTPUT
+        echo $notes >> $env:GITHUB_OUTPUT
+        echo "EOF" >> $env:GITHUB_OUTPUT
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Task Logger ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || github.ref_name }}
+        body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+        files: |
+          ./TaskLogger-*-Installer.zip
+          ./TaskLogger-*-Portable.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
