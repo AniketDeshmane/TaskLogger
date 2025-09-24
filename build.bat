@@ -353,7 +353,7 @@ if %CREATE_PACKAGE%==1 (
     echo Distribution packages created.
     echo.
 ) else (
-    echo [7/7] Skipping Package Creation^
+    echo [7/7] Skipping Package Creation
     echo.
 )
 
