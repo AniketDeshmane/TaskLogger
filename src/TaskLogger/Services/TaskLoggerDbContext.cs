@@ -79,7 +79,7 @@ namespace TaskLogger.Services
             try
             {
                 logger.LogDebug("Getting database path from configuration");
-                var configService = new DatabaseConfigService();
+                var configService = new ConfigService();
                 var path = configService.GetDatabasePath();
                 logger.LogDebug($"Database path from config: {path}");
                 return path;
@@ -103,7 +103,7 @@ namespace TaskLogger.Services
         {
             try
             {
-                var configService = new DatabaseConfigService();
+                var configService = new ConfigService();
                 return configService.GetDatabasePath();
             }
             catch

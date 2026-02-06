@@ -148,6 +148,9 @@ if %CLEAN_BUILD%==1 (
     echo =================================
     echo.
     
+    :: Close any running TaskLogger so publish can overwrite the exe
+    taskkill /IM TaskLogger.exe /F 2>nul
+    
     if exist "%SRC_DIR%\bin" (
         echo   - Cleaning bin directory...
         rmdir /s /q "%SRC_DIR%\bin" 2>nul
@@ -166,9 +169,10 @@ if %CLEAN_BUILD%==1 (
     )
     if exist "%OUTPUT_DIR%" (
         echo   - Cleaning output directory...
-        rmdir /s /q "%OUTPUT_DIR%" 2>nul
-        mkdir "%OUTPUT_DIR%"
+        del /q "%OUTPUT_DIR%\*" 2>nul
+        for /d %%d in ("%OUTPUT_DIR%\*") do @rmdir "%%d" /s /q 2>nul
     )
+    if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
     
     echo.
     echo Clean completed.
@@ -186,14 +190,15 @@ if %BUILD_PROJECT%==1 (
     echo =================================
     echo.
     
-    cd /d "%SRC_DIR%"
-    dotnet restore --verbosity quiet
+    cd /d "%PROJECT_DIR%"
+    
+    dotnet restore "%SRC_DIR%\TaskLogger.csproj" --verbosity quiet
     if %errorLevel% neq 0 (
         echo ERROR: Failed to restore NuGet packages
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
         echo ERROR: NuGet restore failed >> "%LOG_FILE%"
-        dotnet restore >> "%LOG_FILE%" 2>&1
+        dotnet restore "%SRC_DIR%\TaskLogger.csproj" >> "%LOG_FILE%" 2>&1
         goto :error
     )
     
@@ -212,27 +217,26 @@ if %BUILD_PROJECT%==1 (
     echo =========================================
     echo.
     
-    cd /d "%SRC_DIR%"
     echo Building %BUILD_TYPE% configuration...
-    dotnet build -c %BUILD_TYPE% --verbosity minimal
+    dotnet build "%SRC_DIR%\TaskLogger.csproj" -c %BUILD_TYPE% --verbosity minimal
     if %errorLevel% neq 0 (
         echo ERROR: Build failed
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
         echo ERROR: Application build failed >> "%LOG_FILE%"
-        dotnet build -c %BUILD_TYPE% >> "%LOG_FILE%" 2>&1
+        dotnet build "%SRC_DIR%\TaskLogger.csproj" -c %BUILD_TYPE% >> "%LOG_FILE%" 2>&1
         goto :error
     )
     
     echo.
     echo Publishing self-contained application...
-    dotnet publish -c %BUILD_TYPE% -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --output "%OUTPUT_DIR%\publish"
+    dotnet publish "%SRC_DIR%\TaskLogger.csproj" -c %BUILD_TYPE% -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --output "%OUTPUT_DIR%\publish"
     if %errorLevel% neq 0 (
         echo ERROR: Publish failed
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
         echo ERROR: Application publish failed >> "%LOG_FILE%"
-        dotnet publish -c %BUILD_TYPE% -r win-x64 --self-contained >> "%LOG_FILE%" 2>&1
+        dotnet publish "%SRC_DIR%\TaskLogger.csproj" -c %BUILD_TYPE% -r win-x64 --self-contained >> "%LOG_FILE%" 2>&1
         goto :error
     )
     
@@ -287,11 +291,9 @@ if %BUILD_INSTALLER%==1 (
     echo ===============================
     echo.
     
-    cd /d "%INSTALLER_DIR%"
-    
     :: Restore WiX packages
     echo   - Restoring WiX packages...
-    dotnet restore --verbosity quiet
+    dotnet restore "%INSTALLER_DIR%\WixInstaller.wixproj" --verbosity quiet
     if %errorLevel% neq 0 (
         echo ERROR: Failed to restore WiX packages
         echo. >> "%LOG_FILE%"
@@ -301,21 +303,40 @@ if %BUILD_INSTALLER%==1 (
     
     :: Build the installer
     echo   - Building installer...
-    dotnet build -c %BUILD_TYPE% --verbosity minimal
+    dotnet build "%INSTALLER_DIR%\WixInstaller.wixproj" -c %BUILD_TYPE% --verbosity minimal
     if %errorLevel% neq 0 (
         echo ERROR: Installer build failed
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
         echo ERROR: Installer build failed >> "%LOG_FILE%"
-        dotnet build -c %BUILD_TYPE% >> "%LOG_FILE%" 2>&1
+        dotnet build "%INSTALLER_DIR%\WixInstaller.wixproj" -c %BUILD_TYPE% >> "%LOG_FILE%" 2>&1
         goto :error
     )
     
-    :: Copy installer to output directory
-    if exist "%INSTALLER_OUTPUT%\TaskLoggerSetup.msi" (
-        copy /Y "%INSTALLER_OUTPUT%\TaskLoggerSetup.msi" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
+    :: Copy installer to output directory (WiX may use default or custom OutputPath)
+    set "INSTALLER_PATH_GUESS_1=%BUILD_DIR%\installer\TaskLoggerSetup.msi"
+    set "INSTALLER_PATH_GUESS_2=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\TaskLoggerSetup.msi"
+    set "INSTALLER_PATH_GUESS_3=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\WixInstaller.msi"
+    
+    echo Searching for installer at:
+    echo   - !INSTALLER_PATH_GUESS_1!
+    echo   - !INSTALLER_PATH_GUESS_2!
+    echo   - !INSTALLER_PATH_GUESS_3!
+    
+    if exist "!INSTALLER_PATH_GUESS_1!" (
+        copy /Y "!INSTALLER_PATH_GUESS_1!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
         echo.
         echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
+    ) else if exist "!INSTALLER_PATH_GUESS_2!" (
+        copy /Y "!INSTALLER_PATH_GUESS_2!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
+        echo.
+        echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
+    ) else if exist "!INSTALLER_PATH_GUESS_3!" (
+        copy /Y "!INSTALLER_PATH_GUESS_3!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
+        echo.
+        echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
+    ) else (
+        echo WARNING: Installer output not found. Skipping copy.
     )
     echo.
 ) else (
@@ -357,60 +378,9 @@ if %CREATE_PACKAGE%==1 (
     echo.
 )
 
-:: ============================================================================
-:: Build Complete
-:: ============================================================================
-:success
-cd /d "%PROJECT_DIR%"
-echo.
-echo ============================================================================
-echo                         BUILD COMPLETED SUCCESSFULLY
-echo ============================================================================
-echo.
-echo Build Outputs:
-echo --------------
-if exist "%OUTPUT_DIR%\publish\TaskLogger.exe" (
-    echo   - Application: %OUTPUT_DIR%\publish\TaskLogger.exe
-    for %%A in ("%OUTPUT_DIR%\publish\TaskLogger.exe") do echo     Size: %%~zA bytes
-)
-if exist "%OUTPUT_DIR%\TaskLoggerSetup.msi" (
-    echo   - Installer: %OUTPUT_DIR%\TaskLoggerSetup.msi
-    for %%A in ("%OUTPUT_DIR%\TaskLoggerSetup.msi") do echo     Size: %%~zA bytes
-)
-if exist "%OUTPUT_DIR%\TaskLogger-Installer.zip" (
-    echo   - Installer Package: %OUTPUT_DIR%\TaskLogger-Installer.zip
-    for %%A in ("%OUTPUT_DIR%\TaskLogger-Installer.zip") do echo     Size: %%~zA bytes
-)
-if exist "%OUTPUT_DIR%\TaskLogger-Portable.zip" (
-    echo   - Portable Package: %OUTPUT_DIR%\TaskLogger-Portable.zip
-    for %%A in ("%OUTPUT_DIR%\TaskLogger-Portable.zip") do echo     Size: %%~zA bytes
-)
-echo.
-echo Build Log: %LOG_FILE%
-echo.
-echo Build completed at %date% %time% >> "%LOG_FILE%"
-echo.
+goto :success
 
-::: Ask if user wants to run the installer (skip in CI)
-if "%GITHUB_CI%"=="0" goto maybe_install
-echo Skipping installer prompt in CI environment
-goto end
-
-:maybe_install
-if not exist "%OUTPUT_DIR%\TaskLoggerSetup.msi" goto end
-choice /C YN /N /M "Would you like to run the installer now? [Y/N]: "
-if errorlevel 2 goto end
-if errorlevel 1 (
-    echo.
-    echo Starting installer...
-    start "" "%OUTPUT_DIR%\TaskLoggerSetup.msi"
-)
-
-::: ============================================================================
-::: Error Handler
-::: ============================================================================
-:::
-::error
+:error
 cd /d "%PROJECT_DIR%"
 echo.
 echo ============================================================================
@@ -421,6 +391,17 @@ echo Please check the log file for details: %LOG_FILE%
 echo.
 echo Build failed at %date% %time% >> "%LOG_FILE%"
 exit /b 1
+
+:: ============================================================================
+:: Build Complete
+:: ============================================================================
+:success
+cd /d "%PROJECT_DIR%"
+echo.
+echo ============================================================================
+echo                         BUILD COMPLETED SUCCESSFULLY
+echo ============================================================================
+goto :end
 
 ::: ============================================================================
 ::: Show Help

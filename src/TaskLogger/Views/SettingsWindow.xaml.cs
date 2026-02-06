@@ -15,10 +15,11 @@ namespace TaskLogger.Views
             
             // Initialize services
             var startupService = new StartupService();
-            var taskService = new TaskService();
+            var configService = new ConfigService();
+            var themeService = new ThemeService(configService);
             
             // Initialize ViewModel
-            _viewModel = new SettingsViewModel(startupService, taskService);
+            _viewModel = new SettingsViewModel(startupService, configService, themeService);
             DataContext = _viewModel;
             
             // Subscribe to ViewModel events

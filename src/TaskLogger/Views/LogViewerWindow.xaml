@@ -3,45 +3,44 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Task Logger - Debug Log Viewer" 
         Height="600" 
         Width="900"
         WindowStartupLocation="CenterOwner">
-    
-    <Grid Background="{StaticResource BackgroundBrush}">
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="15">
+        <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16">
             <StackPanel>
                 <TextBlock Text="Debug Log Viewer" 
-                          Foreground="White" 
-                          FontSize="20" 
-                          FontWeight="Bold"/>
+                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
                 <TextBlock x:Name="LogFilePathText" 
-                          Foreground="White" 
-                          FontSize="12" 
-                          Opacity="0.9"
-                          Margin="0,5,0,0"/>
+                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                           Margin="0,4,0,0"/>
             </StackPanel>
-        </Border>
-        
+        </materialDesign:ColorZone>
+
         <!-- Log Content -->
         <Grid Grid.Row="1" Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
+
             <!-- Filter Controls -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <ComboBox x:Name="LogLevelFilter" Width="100" Margin="0,0,10,0">
+                <ComboBox x:Name="LogLevelFilter" Width="100" Margin="0,0,10,0"
+                          materialDesign:HintAssist.Hint="Level">
                     <ComboBoxItem Content="All" IsSelected="True"/>
                     <ComboBoxItem Content="DEBUG"/>
                     <ComboBoxItem Content="INFO"/>
@@ -49,68 +48,79 @@
                     <ComboBoxItem Content="ERROR"/>
                     <ComboBoxItem Content="FATAL"/>
                 </ComboBox>
-                
-                <TextBox x:Name="SearchBox" Width="200" Margin="0,0,10,0" 
-                        Tag="Search logs..."
-                        VerticalAlignment="Center"/>
-                
-                <Button Content="Refresh" Click="RefreshButton_Click" 
-                       Style="{StaticResource ModernButton}"
-                       Padding="10,5" Margin="0,0,10,0"/>
-                
-                <Button Content="Clear Filter" Click="ClearFilterButton_Click" 
-                       Style="{StaticResource ModernButton}"
-                       Background="{StaticResource SecondaryBrush}"
-                       Padding="10,5" Margin="0,0,10,0"/>
-                
+
+                <TextBox x:Name="SearchBox" Width="200" Margin="0,0,10,0"
+                         materialDesign:HintAssist.Hint="Search logs..."
+                         VerticalAlignment="Center"/>
+
+                <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="RefreshButton_Click" 
+                        Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh"/>
+                        <TextBlock Text="Refresh" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        Click="ClearFilterButton_Click"
+                        Margin="0,0,10,0">
+                    Clear Filter
+                </Button>
+
                 <CheckBox x:Name="AutoRefreshCheckBox" Content="Auto-refresh (5s)" 
-                         VerticalAlignment="Center" Margin="10,0,0,0"
-                         Checked="AutoRefreshCheckBox_Checked"
-                         Unchecked="AutoRefreshCheckBox_Unchecked"/>
+                          VerticalAlignment="Center" Margin="10,0,0,0"
+                          Checked="AutoRefreshCheckBox_Checked"
+                          Unchecked="AutoRefreshCheckBox_Unchecked"/>
             </StackPanel>
-            
+
             <!-- Log Display -->
-            <Border Grid.Row="1" Style="{StaticResource ModernCard}" Padding="10">
+            <materialDesign:Card Grid.Row="1" Padding="10">
                 <ScrollViewer x:Name="LogScrollViewer" 
-                             VerticalScrollBarVisibility="Auto"
-                             HorizontalScrollBarVisibility="Auto">
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto">
                     <TextBox x:Name="LogTextBox" 
-                            IsReadOnly="True" 
-                            FontFamily="Consolas" 
-                            FontSize="12"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            TextWrapping="NoWrap"
-                            AcceptsReturn="True"/>
+                             IsReadOnly="True" 
+                             FontFamily="Consolas" 
+                             FontSize="12"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             TextWrapping="NoWrap"
+                             AcceptsReturn="True"/>
                 </ScrollViewer>
-            </Border>
+            </materialDesign:Card>
         </Grid>
-        
+
         <!-- Status Bar -->
-        <Border Grid.Row="2" Background="{StaticResource CardBrush}" 
-                BorderBrush="#E0E0E0" BorderThickness="0,1,0,0">
+        <materialDesign:ColorZone Grid.Row="2" Mode="Light">
             <Grid Margin="10,5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <TextBlock Grid.Column="0" x:Name="StatusText" 
-                          VerticalAlignment="Center"
-                          Foreground="{StaticResource TextSecondaryBrush}"/>
-                
-                <Button Grid.Column="1" Content="Open Log Folder" 
-                       Click="OpenLogFolderButton_Click" 
-                       Style="{StaticResource ModernButton}"
-                       Background="{StaticResource AccentBrush}"
-                       Padding="10,5" Margin="5,0"/>
-                
-                <Button Grid.Column="2" Content="Close" 
-                       Click="CloseButton_Click" 
-                       Style="{StaticResource ModernButton}"
-                       Padding="20,5"/>
+                           VerticalAlignment="Center"
+                           Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+
+                <Button Grid.Column="1" 
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="OpenLogFolderButton_Click"
+                        Background="{DynamicResource MaterialDesignAccentBrush}"
+                        Margin="5,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FolderOpen"/>
+                        <TextBlock Text="Open Folder" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="2"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Click="CloseButton_Click">
+                    Close
+                </Button>
             </Grid>
-        </Border>
+        </materialDesign:ColorZone>
     </Grid>
 </Window>

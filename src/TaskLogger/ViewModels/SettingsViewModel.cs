@@ -12,15 +12,18 @@ namespace TaskLogger.ViewModels
     public class SettingsViewModel : INotifyPropertyChanged
     {
         private readonly IStartupService _startupService;
-        private readonly ITaskService _taskService;
+        private readonly IConfigService _configService;
+        private readonly IThemeService _themeService;
         private bool _isStartupEnabled;
         private bool _showWeekendNotifications = true;
         private string _logFilePath = "";
+        private bool _isDarkTheme;
 
-        public SettingsViewModel(IStartupService startupService, ITaskService taskService)
+        public SettingsViewModel(IStartupService startupService, IConfigService configService, IThemeService themeService)
         {
             _startupService = startupService;
-            _taskService = taskService;
+            _configService = configService;
+            _themeService = themeService;
             LoadSettings();
         }
 
@@ -42,6 +45,18 @@ namespace TaskLogger.ViewModels
             set => SetProperty(ref _logFilePath, value);
         }
 
+        public bool IsDarkTheme
+        {
+            get => _isDarkTheme;
+            set
+            {
+                if (SetProperty(ref _isDarkTheme, value))
+                {
+                    _themeService.IsDarkTheme = value;
+                }
+            }
+        }
+
         public ICommand SaveSettingsCommand => new RelayCommand(SaveSettings);
         public ICommand OpenLogFolderCommand => new RelayCommand(OpenLogFolder);
         public ICommand ChangeDatabaseLocationCommand => new RelayCommand(ChangeDatabaseLocation);
@@ -52,7 +67,8 @@ namespace TaskLogger.ViewModels
         private void LoadSettings()
         {
             IsStartupEnabled = _startupService.IsStartupEnabled();
-            LogFilePath = _taskService.GetDatabasePath();
+            LogFilePath = _configService.GetDatabasePath();
+            IsDarkTheme = _themeService.IsDarkTheme;
         }
 
         private void SaveSettings()
@@ -67,6 +83,9 @@ namespace TaskLogger.ViewModels
                 {
                     _startupService.DisableStartup();
                 }
+                
+                // The theme is saved automatically when the property is set
+                // So no explicit save is needed here.
 
                 SettingsSaved?.Invoke();
             }

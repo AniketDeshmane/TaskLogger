@@ -22,6 +22,13 @@ namespace TaskLogger
                 // Set up global exception handlers
                 SetupExceptionHandlers();
 
+                // Initialize services
+                var configService = new ConfigService();
+                var themeService = new ThemeService(configService);
+
+                // Apply theme
+                themeService.ApplyTheme();
+
                 // Log command line arguments
                 if (e.Args.Length > 0)
                 {

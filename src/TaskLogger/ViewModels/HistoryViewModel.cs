@@ -19,10 +19,12 @@ namespace TaskLogger.ViewModels
         private bool _isLoading;
         private string _taskCountText = "";
 
+        private bool _filterByCurrentMonth;
+
         public HistoryViewModel(ITaskService taskService)
         {
             _taskService = taskService;
-            LoadTasksAsync();
+            _ = LoadTasksAsync();
         }
 
         public ObservableCollection<TaskEntryViewModel> Tasks
@@ -38,7 +40,19 @@ namespace TaskLogger.ViewModels
             {
                 if (SetProperty(ref _searchText, value))
                 {
-                    FilterTasksAsync();
+                    _ = FilterTasksAsync();
+                }
+            }
+        }
+
+        public bool FilterByCurrentMonth
+        {
+            get => _filterByCurrentMonth;
+            set
+            {
+                if (SetProperty(ref _filterByCurrentMonth, value))
+                {
+                    _ = FilterTasksAsync();
                 }
             }
         }
@@ -69,7 +83,7 @@ namespace TaskLogger.ViewModels
                 var tasks = await _taskService.GetTasksAsync();
                 var viewModels = tasks.Select(t => new TaskEntryViewModel(t));
                 Tasks = new ObservableCollection<TaskEntryViewModel>(viewModels);
-                UpdateTaskCountText();
+                await UpdateTaskCountTextAsync();
             }
             catch (Exception ex)
             {
@@ -87,10 +101,10 @@ namespace TaskLogger.ViewModels
             IsLoading = true;
             try
             {
-                var tasks = await _taskService.SearchTasksAsync(SearchText);
+                var tasks = await _taskService.SearchTasksAsync(SearchText, FilterByCurrentMonth);
                 var viewModels = tasks.Select(t => new TaskEntryViewModel(t));
                 Tasks = new ObservableCollection<TaskEntryViewModel>(viewModels);
-                UpdateTaskCountText();
+                await UpdateTaskCountTextAsync();
             }
             catch (Exception ex)
             {
@@ -102,12 +116,12 @@ namespace TaskLogger.ViewModels
             }
         }
 
-        private void UpdateTaskCountText()
+        private async Task UpdateTaskCountTextAsync()
         {
             var count = Tasks.Count;
-            var totalCount = _taskService.GetTaskCountAsync().Result;
+            var totalCount = await _taskService.GetTaskCountAsync();
             
-            if (string.IsNullOrWhiteSpace(SearchText))
+            if (string.IsNullOrWhiteSpace(SearchText) && !FilterByCurrentMonth)
             {
                 TaskCountText = $"Total tasks: {totalCount}";
             }
@@ -136,7 +150,7 @@ namespace TaskLogger.ViewModels
         {
             try
             {
-                await _taskService.ExportTasksAsync(filePath, Path.GetExtension(filePath));
+                await _taskService.ExportTasksAsync(filePath, Path.GetExtension(filePath), FilterByCurrentMonth);
             }
             catch (Exception ex)
             {
@@ -165,7 +179,7 @@ namespace TaskLogger.ViewModels
             {
                 await _taskService.DeleteTaskAsync(taskViewModel.Id);
                 Tasks.Remove(taskViewModel);
-                UpdateTaskCountText();
+                await UpdateTaskCountTextAsync();
             }
             catch (Exception ex)
             {

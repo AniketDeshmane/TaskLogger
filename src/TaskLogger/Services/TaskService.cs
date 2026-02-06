@@ -78,20 +78,27 @@ namespace TaskLogger.Services
             return tasks;
         }
 
-        public async Task<List<TaskEntry>> SearchTasksAsync(string searchText)
+        public async Task<List<TaskEntry>> SearchTasksAsync(string searchText, bool filterByCurrentMonth)
         {
-            if (string.IsNullOrWhiteSpace(searchText))
+            var query = _context.Tasks.AsQueryable();
+
+            if (filterByCurrentMonth)
             {
-                return await GetTasksAsync();
+                var today = DateTime.Today;
+                var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                query = query.Where(t => t.CreatedAt >= firstDayOfMonth && t.CreatedAt <= lastDayOfMonth);
             }
 
-            var searchLower = searchText.ToLower();
-            return await _context.Tasks
-                .Where(t => t.Task.ToLower().Contains(searchLower) ||
-                           (t.Notes != null && t.Notes.ToLower().Contains(searchLower)) ||
-                           (t.EventType != null && t.EventType.ToLower().Contains(searchLower)))
-                .OrderByDescending(t => t.CreatedAt)
-                .ToListAsync();
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var searchLower = searchText.ToLower();
+                query = query.Where(t => t.Task.ToLower().Contains(searchLower) ||
+                                       (t.Notes != null && t.Notes.ToLower().Contains(searchLower)) ||
+                                       (t.EventType != null && t.EventType.ToLower().Contains(searchLower)));
+            }
+
+            return await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
         }
 
         public async Task<List<TaskEntry>> GetTasksByDateRangeAsync(DateTime startDate, DateTime endDate)
@@ -155,9 +162,26 @@ namespace TaskLogger.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task ExportTasksAsync(string filePath, string format)
+        public async Task ExportTasksAsync(string filePath, string format, bool filterByCurrentMonth)
         {
-            var tasks = await GetTasksAsync();
+            List<TaskEntry> tasks;
+            if (filterByCurrentMonth)
+            {
+                var today = DateTime.Today;
+                var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                tasks = await _context.Tasks.Where(t => t.CreatedAt >= firstDayOfMonth && t.CreatedAt <= lastDayOfMonth)
+                                            .OrderByDescending(t => t.CreatedAt)
+                                            .ToListAsync();
+            }
+            else
+            {
+                tasks = await GetTasksAsync();
+            }
+
+            //The user requested asc to desc, which is newest to oldest, so OrderByDescending is correct.
+            tasks = tasks.OrderByDescending(t => t.CreatedAt).ToList();
+            
             var extension = Path.GetExtension(filePath).ToLower();
 
             switch (extension)

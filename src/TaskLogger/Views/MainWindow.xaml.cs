@@ -7,12 +7,12 @@ namespace TaskLogger.Views
 {
     public partial class MainWindow : Window
     {
-        private readonly MainViewModel _viewModel;
+        private MainViewModel _viewModel = null!;
         private readonly ISystemTrayService _systemTrayService;
         private readonly IStartupPromptService _startupPromptService;
         private readonly IStartupService _startupService;
-        private readonly IBackgroundService _backgroundService;
-        private readonly IDatabaseConfigService _databaseConfigService;
+        private IBackgroundService _backgroundService = null!;
+        private readonly IConfigService _configService;
         private readonly ILoggingService _logger;
 
         public MainWindow()
@@ -48,8 +48,8 @@ namespace TaskLogger.Views
                 _logger.LogDebug("Creating StartupService");
                 _startupService = new StartupService();
                 
-                _logger.LogDebug("Creating DatabaseConfigService");
-                _databaseConfigService = new DatabaseConfigService();
+                _logger.LogDebug("Creating ConfigService");
+                _configService = new ConfigService();
                 
                 _logger.LogInfo("All services initialized successfully");
             }
@@ -65,14 +65,14 @@ namespace TaskLogger.Views
             try
             {
                 _logger.LogInfo("Checking database configuration");
-                if (!_databaseConfigService.IsDatabasePathConfigured())
+                if (!_configService.IsDatabasePathConfigured())
                 {
                     _logger.LogInfo("Database path not configured, showing configuration window");
                     ShowDatabaseConfiguration();
                 }
                 else
                 {
-                    _logger.LogInfo($"Database already configured at: {_databaseConfigService.GetDatabasePath()}");
+                    _logger.LogInfo($"Database already configured at: {_configService.GetDatabasePath()}");
                 }
             }
             catch (Exception ex)
@@ -256,13 +256,13 @@ namespace TaskLogger.Views
                 if (result != true)
                 {
                     // User cancelled, use default path
-                    var defaultPath = _databaseConfigService.GetDefaultDatabasePath();
+                    var defaultPath = _configService.GetDefaultDatabasePath();
                     _logger.LogInfo($"User cancelled, using default path: {defaultPath}");
-                    _databaseConfigService.SetDatabasePath(defaultPath);
+                    _configService.SetDatabasePath(defaultPath);
                 }
                 else
                 {
-                    _logger.LogInfo($"Database path configured: {_databaseConfigService.GetDatabasePath()}");
+                    _logger.LogInfo($"Database path configured: {_configService.GetDatabasePath()}");
                 }
             }
             catch (Exception ex)

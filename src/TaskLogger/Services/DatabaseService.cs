@@ -128,7 +128,7 @@ namespace TaskLogger.Services
             }
         }
 
-        private string ExtractEventType(string taskText)
+        private string? ExtractEventType(string taskText)
         {
             if (taskText.StartsWith("[") && taskText.Contains("]"))
             {
