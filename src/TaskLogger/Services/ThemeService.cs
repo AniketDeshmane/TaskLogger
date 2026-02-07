@@ -1,3 +1,4 @@
+using System.Windows;
 using MaterialDesignThemes.Wpf;
 
 namespace TaskLogger.Services
@@ -23,13 +24,13 @@ namespace TaskLogger.Services
 
         public void ApplyTheme()
         {
-            var paletteHelper = new PaletteHelper();
-            var theme = paletteHelper.GetTheme();
+            var resources = Application.Current.Resources;
+            var theme = resources.GetTheme();
             if (IsDarkTheme)
                 theme.SetDarkTheme();
             else
                 theme.SetLightTheme();
-            paletteHelper.SetTheme(theme);
+            resources.SetTheme(theme);
         }
     }
 }

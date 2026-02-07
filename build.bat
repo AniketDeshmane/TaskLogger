@@ -148,9 +148,6 @@ if %CLEAN_BUILD%==1 (
     echo =================================
     echo.
     
-    :: Close any running TaskLogger so publish can overwrite the exe
-    taskkill /IM TaskLogger.exe /F 2>nul
-    
     if exist "%SRC_DIR%\bin" (
         echo   - Cleaning bin directory...
         rmdir /s /q "%SRC_DIR%\bin" 2>nul
@@ -169,10 +166,9 @@ if %CLEAN_BUILD%==1 (
     )
     if exist "%OUTPUT_DIR%" (
         echo   - Cleaning output directory...
-        del /q "%OUTPUT_DIR%\*" 2>nul
-        for /d %%d in ("%OUTPUT_DIR%\*") do @rmdir "%%d" /s /q 2>nul
+        rmdir /s /q "%OUTPUT_DIR%" 2>nul
+        mkdir "%OUTPUT_DIR%"
     )
-    if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
     
     echo.
     echo Clean completed.
@@ -313,15 +309,13 @@ if %BUILD_INSTALLER%==1 (
         goto :error
     )
     
-    :: Copy installer to output directory (WiX may use default or custom OutputPath)
-    set "INSTALLER_PATH_GUESS_1=%BUILD_DIR%\installer\TaskLoggerSetup.msi"
-    set "INSTALLER_PATH_GUESS_2=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\TaskLoggerSetup.msi"
-    set "INSTALLER_PATH_GUESS_3=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\WixInstaller.msi"
+    :: Copy installer to output directory
+    set "INSTALLER_PATH_GUESS_1=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\TaskLoggerSetup.msi"
+    set "INSTALLER_PATH_GUESS_2=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\WixInstaller.msi"
     
     echo Searching for installer at:
     echo   - !INSTALLER_PATH_GUESS_1!
     echo   - !INSTALLER_PATH_GUESS_2!
-    echo   - !INSTALLER_PATH_GUESS_3!
     
     if exist "!INSTALLER_PATH_GUESS_1!" (
         copy /Y "!INSTALLER_PATH_GUESS_1!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
@@ -329,10 +323,6 @@ if %BUILD_INSTALLER%==1 (
         echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
     ) else if exist "!INSTALLER_PATH_GUESS_2!" (
         copy /Y "!INSTALLER_PATH_GUESS_2!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
-        echo.
-        echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
-    ) else if exist "!INSTALLER_PATH_GUESS_3!" (
-        copy /Y "!INSTALLER_PATH_GUESS_3!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
         echo.
         echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
     ) else (
@@ -378,8 +368,6 @@ if %CREATE_PACKAGE%==1 (
     echo.
 )
 
-goto :success
-
 :error
 cd /d "%PROJECT_DIR%"
 echo.
@@ -401,7 +389,6 @@ echo.
 echo ============================================================================
 echo                         BUILD COMPLETED SUCCESSFULLY
 echo ============================================================================
-goto :end
 
 ::: ============================================================================
 ::: Show Help

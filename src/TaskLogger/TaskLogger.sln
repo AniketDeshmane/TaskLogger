@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11408.102 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskLogger", "TaskLogger.csproj", "{BDFD6814-C255-877C-1CD2-29C2E895AF6C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BDFD6814-C255-877C-1CD2-29C2E895AF6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDFD6814-C255-877C-1CD2-29C2E895AF6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDFD6814-C255-877C-1CD2-29C2E895AF6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDFD6814-C255-877C-1CD2-29C2E895AF6C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7859A452-C0DA-4E95-9C28-311006EB5D61}
+	EndGlobalSection
+EndGlobal

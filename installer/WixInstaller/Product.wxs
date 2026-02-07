@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   
   <!-- Product Information -->
   <Package Name="Task Logger" 
@@ -33,8 +32,12 @@
       AllowSameVersionUpgrades="no" 
       Schedule="afterInstallInitialize" />
     
-    <!-- UI (WixUI extension) -->
-    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <!-- UI -->
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+    </UI>
+    
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
     
     <!-- Installation Directory Structure -->
     <StandardDirectory Id="ProgramFiles6432Folder">
