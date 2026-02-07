@@ -18,7 +18,7 @@
 
         <!-- Header -->
         <TextBlock Grid.Row="0" Text="⚙️ Settings" 
-                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                   Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,16"/>
 
@@ -50,7 +50,7 @@
                         <CheckBox Content="Start Task Logger with Windows"
                                   IsChecked="{Binding IsStartupEnabled, Mode=TwoWay}"/>
                         <TextBlock Text="Automatically launch Task Logger when Windows starts" 
-                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </GroupBox>
@@ -63,7 +63,7 @@
                         <CheckBox Content="Show weekend notifications"
                                   IsChecked="{Binding ShowWeekendNotifications, Mode=TwoWay}"/>
                         <TextBlock Text="Display friendly weekend messages when logging is disabled" 
-                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </GroupBox>

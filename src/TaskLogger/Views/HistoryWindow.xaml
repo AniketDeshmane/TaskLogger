@@ -17,7 +17,7 @@
         <!-- Header -->
         <TextBlock Grid.Row="0" 
                    Text="📋 Task History" 
-                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                   Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,16"/>
 
@@ -46,7 +46,7 @@
                                   VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBlock Text="{Binding TaskCountText}" 
-                               Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                               Style="{StaticResource MaterialDesignBodySmallTextBlock}"/>
                 </StackPanel>
 
                 <!-- History List -->
@@ -63,15 +63,15 @@
                                     <StackPanel Grid.Column="0">
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                             <TextBlock Text="{Binding Timestamp}" 
-                                                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                       Style="{StaticResource MaterialDesignTitleSmallTextBlock}"
                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                                             <TextBlock Text="{Binding EventType, StringFormat=' [{0}]'}"
-                                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                       Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                                                        Foreground="{DynamicResource SecondaryHueMidBrush}"
                                                        Visibility="{Binding EventType, Converter={StaticResource StringToVisibilityConverter}}"/>
                                         </StackPanel>
                                         <TextBlock Text="{Binding Task}" 
-                                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                                   Style="{StaticResource MaterialDesignBodyLargeTextBlock}"
                                                    TextWrapping="Wrap"
                                                    Visibility="{Binding IsEditing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                         <TextBox Text="{Binding Task, UpdateSourceTrigger=PropertyChanged}" 
@@ -81,7 +81,7 @@
                                                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                                  Margin="0,0,0,5"/>
                                         <TextBlock Text="{Binding Notes}" 
-                                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                   Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                                                    FontStyle="Italic"
                                                    TextWrapping="Wrap"
                                                    Margin="0,5,0,0"

@@ -21,7 +21,7 @@
         <!-- Header -->
         <TextBlock Grid.Row="0"
                    Text="📝 Task Logger"
-                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                   Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,16" />
 
@@ -40,10 +40,10 @@
                             Margin="0,0,0,16"
                             HorizontalAlignment="Center">
                     <TextBlock Text="{Binding DateText}"
-                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}" />
+                               Style="{StaticResource MaterialDesignTitleMediumTextBlock}" />
                     <TextBlock Text="It's the weekend! Take a break and enjoy your time off! 🎉"
                                Visibility="{Binding IsWeekend, Converter={StaticResource BooleanToVisibilityConverter}}"
-                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                                Foreground="{DynamicResource MaterialDesignErrorBrush}"
                                Margin="0,4,0,0" />
                 </StackPanel>
@@ -117,8 +117,8 @@
                          Fill="{Binding IsStatusSuccess, Converter={StaticResource BoolToColorConverter}}"
                          Margin="0,0,8,0" />
                 <TextBlock Text="{Binding StatusText}"
-                           Style="{StaticResource MaterialDesignBody2TextBlock}"
-                           Foreground="{DynamicResource MaterialDesignBodyLightTextBlock}" />
+                           Style="{StaticResource MaterialDesignBodyMediumTextBlock}"
+                           Opacity="0.6" />
             </StackPanel>
         </materialDesign:Card>
     </Grid>

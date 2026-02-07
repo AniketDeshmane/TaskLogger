@@ -13,7 +13,7 @@ echo.
 
 :: Check for administrator privileges (needed for some operations)
 net session >nul 2>&1
-if %errorLevel% neq 0 (
+if !errorLevel! neq 0 (
     echo Warning: Not running as administrator. Some features may be limited.
     echo.
 )
@@ -107,7 +107,7 @@ echo.
 :: Check for .NET SDK
 echo Checking .NET SDK...
 dotnet --version >nul 2>&1
-if %errorLevel% neq 0 (
+if !errorLevel! neq 0 (
     echo ERROR: .NET SDK is not installed or not in PATH
     echo Please install .NET 8.0 SDK from: https://dotnet.microsoft.com/download
     echo. >> "%LOG_FILE%"
@@ -122,10 +122,10 @@ echo   - .NET SDK Version: %DOTNET_VERSION% >> "%LOG_FILE%"
 if %BUILD_INSTALLER%==1 (
     echo Checking WiX Toolset...
     dotnet tool list -g | findstr /i "wix" >nul 2>&1
-    if %errorLevel% neq 0 (
+    if !errorLevel! neq 0 (
         echo   - WiX not found. Installing WiX Toolset...
         dotnet tool install --global wix --version 4.0.5
-        if %errorLevel% neq 0 (
+        if !errorLevel! neq 0 (
             echo ERROR: Failed to install WiX Toolset
             echo. >> "%LOG_FILE%"
             echo ERROR: WiX Toolset installation failed >> "%LOG_FILE%"
@@ -189,7 +189,7 @@ if %BUILD_PROJECT%==1 (
     cd /d "%PROJECT_DIR%"
     
     dotnet restore "%SRC_DIR%\TaskLogger.csproj" --verbosity quiet
-    if %errorLevel% neq 0 (
+    if !errorLevel! neq 0 (
         echo ERROR: Failed to restore NuGet packages
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
@@ -215,7 +215,7 @@ if %BUILD_PROJECT%==1 (
     
     echo Building %BUILD_TYPE% configuration...
     dotnet build "%SRC_DIR%\TaskLogger.csproj" -c %BUILD_TYPE% --verbosity minimal
-    if %errorLevel% neq 0 (
+    if !errorLevel! neq 0 (
         echo ERROR: Build failed
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
@@ -227,7 +227,7 @@ if %BUILD_PROJECT%==1 (
     echo.
     echo Publishing self-contained application...
     dotnet publish "%SRC_DIR%\TaskLogger.csproj" -c %BUILD_TYPE% -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --output "%OUTPUT_DIR%\publish"
-    if %errorLevel% neq 0 (
+    if !errorLevel! neq 0 (
         echo ERROR: Publish failed
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
@@ -290,7 +290,7 @@ if %BUILD_INSTALLER%==1 (
     :: Restore WiX packages
     echo   - Restoring WiX packages...
     dotnet restore "%INSTALLER_DIR%\WixInstaller.wixproj" --verbosity quiet
-    if %errorLevel% neq 0 (
+    if !errorLevel! neq 0 (
         echo ERROR: Failed to restore WiX packages
         echo. >> "%LOG_FILE%"
         echo ERROR: WiX restore failed >> "%LOG_FILE%"
@@ -300,7 +300,7 @@ if %BUILD_INSTALLER%==1 (
     :: Build the installer
     echo   - Building installer...
     dotnet build "%INSTALLER_DIR%\WixInstaller.wixproj" -c %BUILD_TYPE% --verbosity minimal
-    if %errorLevel% neq 0 (
+    if !errorLevel! neq 0 (
         echo ERROR: Installer build failed
         echo Check the log file for details: %LOG_FILE%
         echo. >> "%LOG_FILE%"
@@ -310,19 +310,20 @@ if %BUILD_INSTALLER%==1 (
     )
     
     :: Copy installer to output directory
-    set "INSTALLER_PATH_GUESS_1=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\TaskLoggerSetup.msi"
-    set "INSTALLER_PATH_GUESS_2=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\WixInstaller.msi"
+    set "INSTALLER_PATH_1=%INSTALLER_OUTPUT%\TaskLoggerSetup.msi"
+    set "INSTALLER_PATH_2=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\TaskLoggerSetup.msi"
+    set "INSTALLER_PATH_3=%INSTALLER_DIR%\bin\%BUILD_TYPE%\en-US\WixInstaller.msi"
     
-    echo Searching for installer at:
-    echo   - !INSTALLER_PATH_GUESS_1!
-    echo   - !INSTALLER_PATH_GUESS_2!
-    
-    if exist "!INSTALLER_PATH_GUESS_1!" (
-        copy /Y "!INSTALLER_PATH_GUESS_1!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
+    if exist "!INSTALLER_PATH_1!" (
+        copy /Y "!INSTALLER_PATH_1!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
         echo.
         echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
-    ) else if exist "!INSTALLER_PATH_GUESS_2!" (
-        copy /Y "!INSTALLER_PATH_GUESS_2!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
+    ) else if exist "!INSTALLER_PATH_2!" (
+        copy /Y "!INSTALLER_PATH_2!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
+        echo.
+        echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
+    ) else if exist "!INSTALLER_PATH_3!" (
+        copy /Y "!INSTALLER_PATH_3!" "%OUTPUT_DIR%\TaskLoggerSetup.msi" >nul
         echo.
         echo Installer created successfully: %OUTPUT_DIR%\TaskLoggerSetup.msi
     ) else (
@@ -368,6 +369,8 @@ if %CREATE_PACKAGE%==1 (
     echo.
 )
 
+goto :success
+
 :error
 cd /d "%PROJECT_DIR%"
 echo.
@@ -389,6 +392,7 @@ echo.
 echo ============================================================================
 echo                         BUILD COMPLETED SUCCESSFULLY
 echo ============================================================================
+goto :end
 
 ::: ============================================================================
 ::: Show Help

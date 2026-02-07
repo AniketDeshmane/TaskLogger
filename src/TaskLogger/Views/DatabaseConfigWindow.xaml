@@ -19,7 +19,7 @@
 
         <!-- Header -->
         <TextBlock Grid.Row="0" Text="🗄️ Database Configuration" 
-                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                   Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,16"/>
 
@@ -27,7 +27,7 @@
         <materialDesign:Card Grid.Row="1" Padding="16">
             <StackPanel>
                 <TextBlock Text="Choose where to store your task data" 
-                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                           Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
                            Margin="0,0,0,15"/>
 
                 <!-- Database Path Input -->
@@ -40,7 +40,7 @@
                     <TextBox Grid.Column="0" 
                              x:Name="DatabasePathTextBox" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Text="{Binding DatabasePath, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding DatabasePath, Mode=OneWay}"
                              materialDesign:HintAssist.Hint="Database File Path"
                              Margin="0,0,10,0"/>
                     <Button Grid.Column="1" 
@@ -80,7 +80,7 @@
                                  Content="Create backup of existing database (if found)"
                                  IsChecked="True"/>
                         <TextBlock Text="Automatically backup your existing task data before moving" 
-                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </GroupBox>
@@ -90,11 +90,11 @@
                                      Background="{DynamicResource MaterialDesignInformationBrush}">
                     <StackPanel>
                         <TextBlock Text="ℹ️ Migration Information" 
-                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                   Style="{StaticResource MaterialDesignTitleSmallTextBlock}"
                                    Foreground="{DynamicResource MaterialDesignInformationForegroundBrush}"
                                    Margin="0,0,0,5"/>
                         <TextBlock Text="If you have existing task data, it will be automatically migrated to the new location. The original database will be backed up for safety." 
-                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Style="{StaticResource MaterialDesignBodyMediumTextBlock}"
                                    Foreground="{DynamicResource MaterialDesignInformationForegroundBrush}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>

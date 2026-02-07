@@ -21,10 +21,10 @@
         <materialDesign:ColorZone Grid.Row="0" Mode="PrimaryMid" Padding="16">
             <StackPanel>
                 <TextBlock Text="Debug Log Viewer" 
-                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                           Style="{StaticResource MaterialDesignHeadlineSmallTextBlock}"
                            Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
                 <TextBlock x:Name="LogFilePathText" 
-                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                           Style="{StaticResource MaterialDesignBodySmallTextBlock}"
                            Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
                            Margin="0,4,0,0"/>
             </StackPanel>
@@ -102,7 +102,7 @@
 
                 <TextBlock Grid.Column="0" x:Name="StatusText" 
                            VerticalAlignment="Center"
-                           Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+                           Style="{StaticResource MaterialDesignBodyMediumTextBlock}"/>
 
                 <Button Grid.Column="1" 
                         Style="{StaticResource MaterialDesignRaisedButton}"
