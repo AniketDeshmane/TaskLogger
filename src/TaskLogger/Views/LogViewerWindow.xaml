@@ -107,7 +107,6 @@
                 <Button Grid.Column="1" 
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         Click="OpenLogFolderButton_Click"
-                        Background="{DynamicResource MaterialDesignAccentBrush}"
                         Margin="5,0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="FolderOpen"/>

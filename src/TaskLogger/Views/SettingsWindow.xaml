@@ -86,9 +86,8 @@
                                     <TextBlock Text="Open Folder" Margin="8,0,0,0"/>
                                 </StackPanel>
                             </Button>
-                            <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Command="{Binding ChangeDatabaseLocationCommand}"
-                                    Background="{DynamicResource MaterialDesignAccentBrush}">
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Command="{Binding ChangeDatabaseLocationCommand}">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="DatabaseEdit"/>
                                     <TextBlock Text="Change" Margin="8,0,0,0"/>

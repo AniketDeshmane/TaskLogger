@@ -77,25 +77,22 @@
                     <Button Style="{StaticResource MaterialDesignRaisedButton}"
                             Command="{Binding ViewHistoryCommand}"
                             Margin="0,0,8,0"
-                            Background="{DynamicResource MaterialDesignAccentBrush}"
                             ToolTip="View History">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="History" />
                             <TextBlock Text="History" Margin="8,0,0,0" />
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
                             Command="{Binding OpenSettingsCommand}"
-                            Background="{DynamicResource MaterialDesignLightPrimaryBrush}"
                             ToolTip="Settings">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Settings" />
                             <TextBlock Text="Settings" Margin="8,0,0,0" />
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
                            Click="DebugLogsButton_Click"
-                           Background="Gray"
                            ToolTip="View application debug logs" Margin="0,0,8,0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Bug" />

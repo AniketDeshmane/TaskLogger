@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="Product.wxs" />
+    <Compile Include="TaskLoggerUI.wxs" />
   </ItemGroup>
 
   <ItemGroup>

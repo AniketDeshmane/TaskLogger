@@ -33,8 +33,11 @@
       AllowSameVersionUpgrades="no" 
       Schedule="afterInstallInitialize" />
     
-    <!-- UI -->
+    <!-- Standard WixUI with InstallDir dialog set (provides all standard dialogs and resources) -->
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    
+    <!-- Custom Action to launch app after install -->
+    <CustomAction Id="LaunchApplication" FileRef="TaskLoggerExe" ExeCommand="" Return="asyncNoWait" Impersonate="yes" />
     
     <!-- Installation Directory Structure -->
     <StandardDirectory Id="ProgramFiles6432Folder">
@@ -56,6 +59,90 @@
         <Component Id="DebugSymbols" Guid="*">
           <File Id="TaskLoggerPdb" Source="..\..\build\output\publish\TaskLogger.pdb" />
         </Component>
+        
+        <!-- Store database path and existing DB path in registry -->
+        <Component Id="DatabasePathRegistry" Guid="*">
+          <RegistryValue Root="HKLM"
+                         Key="SOFTWARE\TaskLogger"
+                         Name="DatabaseFolder"
+                         Type="string"
+                         Value="[DATABASEFOLDER]"
+                         KeyPath="yes" />
+          <RegistryValue Root="HKLM"
+                         Key="SOFTWARE\TaskLogger"
+                         Name="ExistingDatabasePath"
+                         Type="string"
+                         Value="[EXISTINGDBPATH]" />
+        </Component>
+        
+        <!-- Auto-start registry entry (conditional on AUTOSTART) -->
+        <Component Id="AutoStartEntry" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890" Condition="AUTOSTART = &quot;1&quot;">
+          <RegistryValue Root="HKCU"
+                         Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+                         Name="TaskLogger"
+                         Type="string"
+                         Value="&quot;[INSTALLFOLDER]TaskLogger.exe&quot;"
+                         KeyPath="yes" />
+        </Component>
+        
+        <!-- Per-user registry cleanup on uninstall -->
+        <Component Id="CleanupUserRegistry" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+          <RegistryValue Root="HKCU"
+                         Key="SOFTWARE\TaskLogger\Cleanup"
+                         Name="RegistryMarker"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+          <RemoveRegistryKey Id="RemoveTaskLoggerUserKey" Root="HKCU" Key="SOFTWARE\TaskLogger" Action="removeOnUninstall" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+    
+    <!-- Database default directory (Documents\TaskLogger) -->
+    <StandardDirectory Id="PersonalFolder">
+      <Directory Id="DATABASEFOLDER" Name="TaskLogger">
+        <!-- Cleanup Documents\TaskLogger on uninstall -->
+        <Component Id="CleanupDocuments" Guid="C3D4E5F6-A7B8-9012-CDEF-123456789012">
+          <RegistryValue Root="HKCU"
+                         Key="SOFTWARE\TaskLogger\Cleanup"
+                         Name="DocumentsMarker"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+          <RemoveFile Id="RemoveDocAllFiles" On="uninstall" Name="*" />
+          <RemoveFolder Id="RemoveDocumentsDir" On="uninstall" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+    
+    <!-- AppData cleanup directories -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="TaskLoggerAppDataDir" Name="TaskLogger">
+        <!-- Cleanup AppData\Local\TaskLogger files on uninstall -->
+        <Component Id="CleanupAppData" Guid="D4E5F6A7-B8C9-0123-DEFA-234567890123">
+          <RegistryValue Root="HKCU"
+                         Key="SOFTWARE\TaskLogger\Cleanup"
+                         Name="AppDataMarker"
+                         Type="integer"
+                         Value="1"
+                         KeyPath="yes" />
+          <RemoveFile Id="RemoveAppDataAllFiles" On="uninstall" Name="*" />
+          <RemoveFolder Id="RemoveAppDataDir" On="uninstall" />
+        </Component>
+        
+        <Directory Id="TaskLoggerLogsDir" Name="Logs">
+          <!-- Cleanup Logs subdirectory on uninstall -->
+          <Component Id="CleanupLogs" Guid="E5F6A7B8-C9D0-1234-EFAB-345678901234">
+            <RegistryValue Root="HKCU"
+                           Key="SOFTWARE\TaskLogger\Cleanup"
+                           Name="LogsMarker"
+                           Type="integer"
+                           Value="1"
+                           KeyPath="yes" />
+            <RemoveFile Id="RemoveAllLogFiles" On="uninstall" Name="*" />
+            <RemoveFolder Id="RemoveLogsDir" On="uninstall" />
+          </Component>
+        </Directory>
       </Directory>
     </StandardDirectory>
     
@@ -65,6 +152,12 @@
              Display="expand" AllowAdvertise="no">
       <ComponentRef Id="MainExecutable" />
       <ComponentRef Id="DebugSymbols" />
+      <ComponentRef Id="DatabasePathRegistry" />
+      <ComponentRef Id="AutoStartEntry" />
+      <ComponentRef Id="CleanupUserRegistry" />
+      <ComponentRef Id="CleanupDocuments" />
+      <ComponentRef Id="CleanupAppData" />
+      <ComponentRef Id="CleanupLogs" />
     </Feature>
     
   </Package>

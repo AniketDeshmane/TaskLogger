@@ -67,7 +67,7 @@
                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                                             <TextBlock Text="{Binding EventType, StringFormat=' [{0}]'}"
                                                        Style="{StaticResource MaterialDesignBodySmallTextBlock}"
-                                                       Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                       Opacity="0.7"
                                                        Visibility="{Binding EventType, Converter={StaticResource StringToVisibilityConverter}}"/>
                                         </StackPanel>
                                         <TextBlock Text="{Binding Task}" 
